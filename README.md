@@ -27,7 +27,7 @@
 
 ## Additional Requirement: Task Queue
 
-We use Bull with Redis to implement asynchronous task queues. When users submit recipes or update settings, tasks are processed in the background to generate calorie analysis and health suggestions. The system will also use task queues to automatically generate weight trend reports.
+We use Bull with Redis to implement asynchronous task queues. When users submit recipes or update settings, tasks are processed in the background to generate calorie analysis and health suggestions.
 
 ## Milestones
 
