@@ -2,21 +2,17 @@
 
 ## Team Members
 
-- **Wengxin Xu**
-  Email: wengxin.xu@mail.utoronto.ca
-  UTORid: xuwengxi
+- **Wengxin Xu**  
+  Email: wengxin.xu@mail.utoronto.ca  
+  UTORid: xuwengxi  
 
-- **Pengpeng Cao**
-  Email: p.cao@mail.utoronto.ca
-  UTORid: caopeng3
-
----
+- **Pengpeng Cao**  
+  Email: p.cao@mail.utoronto.ca  
+  UTORid: caopeng3  
 
 ## Project Description
 
 **FitSmart** is a web application that helps users manage their diet and fitness plans. After logging in, users can add recipes, track calories, set health goals, follow personalized workout plans, and record daily weight with progress charts. The system offers food and exercise recommendations based on user preferences (e.g. allergies, dietary mode), with some suggestions generated asynchronously using AI.
-
----
 
 ## Tech Stack
 
@@ -29,13 +25,9 @@
 - **CI/CD**: GitHub Actions
 - **Task Queue**: Bull + Redis
 
----
-
 ## Additional Requirement: Task Queue
 
 We use Bull with Redis to implement asynchronous task queues. When users submit recipes or update settings, tasks are processed in the background to generate calorie analysis and health suggestions. The system will also use task queues to automatically generate weight trend reports.
-
----
 
 ## Milestones
 
