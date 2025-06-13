@@ -1,54 +1,72 @@
-# Project: Fit Smart
+# AI Doodle
 
 ## Team Members
 
 - **Wengxin Xu**  
   Email: wengxin.xu@mail.utoronto.ca  
-  UTORid: xuwengxi  
+  UTORid: xuwengxi
 
 - **Pengpeng Cao**  
   Email: p.cao@mail.utoronto.ca  
-  UTORid: caopeng3  
+  UTORid: caopeng3
+
+---
 
 ## Project Description
 
-**FitSmart** is a web application that helps users manage their diet and fitness plans. After logging in, users can add recipes, track calories, set health goals, follow personalized workout plans, and record daily weight with progress charts. The system offers food and exercise recommendations based on user preferences (e.g. allergies, dietary mode), with some suggestions generated asynchronously using AI.
+**AI Doodle** is a multi-player web game that combines AI image generation, creativity, and social deduction. It challenges players to interpret and describe images in a chain—while trying to identify a hidden spy.
+
+### Game Rules
+
+1. At the start of each round, AI randomly selects a secret word and assigns one player as the **Spy**.
+2. The first player sees the word (except the spy) and enters a prompt based on the word to generate an image using AI.
+3. The next player **only sees the previous image**, and writes a prompt describing what they think it is. A new image is generated based on that.
+4. The process continues until the last player.
+5. The last player attempts to guess the original word (or a synonym).
+   - If correct, all players except the spy win.
+   - If incorrect, all players view the image chain and vote on who the spy is.
+     - If the spy is correctly identified, all players except the spy win.
+     - Otherwise, the spy wins.
+
+---
 
 ## Tech Stack
 
-- **Frontend**: Vue 3 (SPA)
+- **Frontend**: Vue 3 (Single Page Application)
 - **Backend**: Express.js (REST API)
 - **Database**: PostgreSQL
-- **Auth**: OAuth 2.0 (Google)
-- **Payment**: Stripe Checkout (Sandbox)
-- **Deployment**: Docker + Docker Compose on VM
+- **Authentication**: OAuth 2.0 (Google Login)
+- **Image Generation**: OpenAI
+- **Real-time Communication**: Socket.IO (WebSockets)
+- **Deployment**: Docker + Docker Compose on a Virtual Machine
 - **CI/CD**: GitHub Actions
-- **Task Queue**: Bull + Redis
 
-## Additional Requirement: Task Queue
-
-We use Bull with Redis to implement asynchronous task queues. When users submit recipes or update settings, tasks are processed in the background to generate calorie analysis and health suggestions.
+---
 
 ## Milestones
 
 ### Alpha Version
 
-- Implement Google OAuth login
-- Integrate Stripe subscription system (non-subscribed users are redirected to the payment page)
-- Set up basic frontend structure (home page, settings page, recipe page)
-- Create database schema (users, settings, recipes, etc.)
-- Implement basic recipe creation and viewing features
+- [ ] Google OAuth login and nickname system
+- [ ] Room creation and join via invite code
+- [ ] Turn-based relay logic with prompt + image generation
+- [ ] Basic frontend and image display interface
 
 ### Beta Version
 
-- Integrate task queue to support asynchronous calorie analysis and recommendation generation
-- Implement fitness goal setting and workout recommendations (display exercise names and video links)
-- Deploy the application to a public virtual machine using Docker and Docker Compose
-- Add support for allergy info and health goal preferences in user settings
+- [ ] Full game loop: word selection, spy assignment, image-prompt chain
+- [ ] Last-player guessing and validation logic
+- [ ] Spy voting phase and winner decision
+- [ ] Real-time synchronization with WebSocket
+- [ ] Dockerized deployment on a VM
 
 ### Final Version
 
-- Implement weight tracking with chart visualization (weekly/monthly/yearly trends)
-- Refine fitness recommendations with body-part-specific categories  
-- Polish UI design
-- Submit final documentation and demo video
+- [ ] In-game UI polish and animations
+- [ ] Image history and game recap display
+- [ ] Flexible word-guess validation (synonyms allowed)
+- [ ] Voting interface with player icons
+- [ ] Chat or emoji reaction system
+- [ ] Final documentation and demo video
+
+---
