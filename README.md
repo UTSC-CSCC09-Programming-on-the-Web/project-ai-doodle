@@ -59,7 +59,7 @@ This project uses **Socket.IO** to implement real-time communication throughout 
 
 - [ ] Google OAuth login and nickname system
 - [ ] Room creation and join via invite code
-- [ ] Turn-based relay logic with prompt + image generation
+- [ ] AI prompt + image generation
 - [ ] Basic frontend and image display interface
 - [ ] Payment system based on Stripe
 
@@ -67,17 +67,15 @@ This project uses **Socket.IO** to implement real-time communication throughout 
 
 - [ ] Full game loop: word selection, spy assignment, image-prompt chain
 - [ ] Last-player guessing and validation logic
-- [ ] Spy voting phase and winner decision
 - [ ] Real-time synchronization with WebSocket
 - [ ] Dockerized deployment on a VM
 
 ### Final Version
 
-- [ ] In-game UI polish and animations
+- [ ] Spy voting phase and winner decision
 - [ ] Image history and game recap display
 - [ ] Flexible word-guess validation (synonyms allowed)
 - [ ] Voting interface with player icons
-- [ ] Chat or emoji reaction system
 - [ ] Final documentation and demo video
 
 ---
