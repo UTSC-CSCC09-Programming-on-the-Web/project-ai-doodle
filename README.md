@@ -43,6 +43,16 @@
 
 ---
 
+## Additional Feature: Real-time Functionality 
+
+This project uses **Socket.IO** to implement real-time communication throughout the game:
+
+- Players join a game room and take turns in real time
+- Each prompt/image submission is immediately broadcast to the next player
+- Voting and results are shown live to all users without needing to refresh
+
+---
+
 ## Milestones
 
 ### Alpha Version
@@ -51,6 +61,7 @@
 - [ ] Room creation and join via invite code
 - [ ] Turn-based relay logic with prompt + image generation
 - [ ] Basic frontend and image display interface
+- [ ] Payment system based on Stripe
 
 ### Beta Version
 
