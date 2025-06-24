@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { testConnection, sequelize } from './models/datasource.js'
-import { User } from './models/user.js'
 
 const app = express();
 const PORT =  3000;
@@ -12,11 +11,9 @@ const PORT =  3000;
 app.use(cors());
 app.use(express.json());
 
-// test
-app.get('/api/hello', async (req, res) => {
-  const user = await User.create({ username: 'test1', nickname: 'Test User' })
-  res.json({ message: `User ${user.username} created` })
-})
+app.get('/api/hello', (req, res) => {
+  res.json({ message: 'Backend is running' });
+});
 
 const init = async () => {
   await testConnection()
