@@ -43,7 +43,7 @@
 
 ---
 
-## Additional Feature: Real-time Functionality 
+## Additional Feature: Real-time Functionality
 
 This project uses **Socket.IO** to implement real-time communication throughout the game:
 

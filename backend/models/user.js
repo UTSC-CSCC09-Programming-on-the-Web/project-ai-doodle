@@ -1,8 +1,8 @@
-import { DataTypes } from 'sequelize'
-import { sequelize } from './datasource.js'
+import { DataTypes } from "sequelize";
+import { sequelize } from "./datasource.js";
 
 // more fields need to be added later
-export const User = sequelize.define('User', {
+export const User = sequelize.define("User", {
   username: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -11,4 +11,4 @@ export const User = sequelize.define('User', {
   nickname: {
     type: DataTypes.STRING,
   },
-})
+});
