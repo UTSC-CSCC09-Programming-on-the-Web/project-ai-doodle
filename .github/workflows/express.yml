@@ -29,4 +29,4 @@ jobs:
       - name: Sleep 2 seconds
         run: sleep 2s
       - name: curl index.html
-        run: "curl --request GET http://localhost:3000/ --fail"
+        run: "curl --request GET http://localhost:3000/api/hello --fail"
