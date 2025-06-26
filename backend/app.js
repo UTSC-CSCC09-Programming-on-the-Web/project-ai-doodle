@@ -1,35 +1,38 @@
 import express from "express";
-import session from 'express-session'
-import passport from 'passport'
+import session from "express-session";
+import passport from "passport";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
-import './auth/passport.js'
-import { authRouter } from './routers/auth_router.js';
+import "./auth/passport.js";
+import { authRouter } from "./routers/auth_router.js";
 
 import { testConnection, sequelize } from "./models/datasource.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({
+app.use(
+  cors({
     origin: process.env.FRONTEND_URL,
-    credentials: true
-  })
+    credentials: true,
+  }),
 );
 app.use(express.json());
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false,
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 1000, // 1 hour
-  },
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    },
+  }),
+);
 
 // Google OAuth2.0
 app.use(passport.initialize());

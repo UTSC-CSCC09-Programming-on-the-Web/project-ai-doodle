@@ -5,9 +5,10 @@ export const authRouter = Router();
 
 authRouter.get(
   "/google",
-  passport.authenticate("google", { 
-    scope: ["profile", "email"], prompt: "consent", 
-  })
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "consent",
+  }),
 );
 
 authRouter.get(
@@ -22,7 +23,7 @@ authRouter.get(
     } else {
       res.redirect(`${process.env.FRONTEND_URL}/subscribe`);
     }
-  }
+  },
 );
 
 authRouter.get("/me", (req, res) => {
@@ -38,7 +39,7 @@ authRouter.get("/me", (req, res) => {
 });
 
 authRouter.get("/logout", (req, res) => {
-  req.logout(err => {
+  req.logout((err) => {
     if (err) {
       return res.status(500).json({ error: "Logout failed" });
     }

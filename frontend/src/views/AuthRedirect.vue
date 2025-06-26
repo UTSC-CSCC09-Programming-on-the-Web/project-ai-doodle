@@ -5,30 +5,30 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 
-const router = useRouter()
+const router = useRouter();
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:3000/api/auth/me', {
-      credentials: 'include',
-    })
+    const res = await fetch("http://localhost:3000/api/auth/me", {
+      credentials: "include",
+    });
 
     if (!res.ok) {
-      return router.push('/login')
+      return router.push("/login");
     }
 
-    const user = await res.json()
+    const user = await res.json();
 
     if (user.isSubscribed) {
-      router.push('/home')
+      router.push("/home");
     } else {
-      router.push('/subscribe')
+      router.push("/subscribe");
     }
   } catch (e) {
-    router.push('/login')
+    router.push("/login");
   }
-})
+});
 </script>

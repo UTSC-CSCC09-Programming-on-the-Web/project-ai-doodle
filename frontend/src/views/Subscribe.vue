@@ -20,18 +20,18 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { useRouter } from "vue-router";
 
-const router = useRouter()
+const router = useRouter();
 
 async function logout() {
   try {
-    await fetch('http://localhost:3000/api/auth/logout', {
-      credentials: 'include',
-    })
-    router.push('/login')
+    await fetch("http://localhost:3000/api/auth/logout", {
+      credentials: "include",
+    });
+    router.push("/login");
   } catch (err) {
-    alert('Logout failed.')
+    alert("Logout failed.");
   }
 }
 </script>

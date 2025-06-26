@@ -33,7 +33,9 @@ passport.use(
         let user = await User.findOne({ where: { email } });
 
         if (!user) {
-          const baseUsername = profile.displayName.replace(/\s+/g, "").toLowerCase();
+          const baseUsername = profile.displayName
+            .replace(/\s+/g, "")
+            .toLowerCase();
           const username = await generateUniqueUsername(baseUsername);
 
           user = await User.create({
@@ -50,8 +52,8 @@ passport.use(
         console.error("Google login error:", err);
         return done(err, null);
       }
-    }
-  )
+    },
+  ),
 );
 
 passport.serializeUser((user, done) => {
