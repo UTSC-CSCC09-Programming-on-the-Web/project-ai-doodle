@@ -5,10 +5,10 @@
       Plase complete the payment to continue using AI Doodle.
     </p>
     <button
-      class="mt-6 px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed"
-      disabled
+      class="mt-6 px-4 py-2 bg-blue-600 text-white rounded"
+      @click="goToCheckout"
     >
-      Stripe Checkout Coming Soon
+      Subscribe with Stripe
     </button>
     <button
       class="mt-4 ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
@@ -23,6 +23,24 @@
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+
+async function goToCheckout() {
+  try {
+    const res = await fetch("http://localhost:3000/api/stripe/checkout", {
+      method: "POST",
+      credentials: "include",
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Failed to redirect to Stripe Checkout");
+    }
+  } catch (err) {
+    console.error("Error during checkout:", err);
+    alert("Checkout failed");
+  }
+}
 
 async function logout() {
   try {
