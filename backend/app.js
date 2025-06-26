@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import "./auth/passport.js";
 import { authRouter } from "./routers/auth_router.js";
+import { stripeRouter } from "./routers/stripe_router.js";
 
 import { testConnection, sequelize } from "./models/datasource.js";
 
@@ -18,7 +19,14 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json());
+
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/stripe/webhook") {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
 app.use(
   session({
@@ -44,6 +52,7 @@ app.get("/api/hello", (req, res) => {
 
 // Routes
 app.use("/api/auth", authRouter);
+app.use("/api/stripe", stripeRouter);
 
 const init = async () => {
   await testConnection();
