@@ -42,11 +42,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start Express server
-        run: node app.js &
+      - name: Install wait-on
+        run: npm install -g wait-on
 
-      - name: Wait for 2 seconds
-        run: sleep 2
+      - name: Start Express server
+        run: node app.js > server.log 2>&1 &
+
+      - name: Wait for server to be ready
+        run: wait-on http://localhost:3000/api/hello
 
       - name: Test /api/hello
         run: curl --fail http://localhost:3000/api/hello
