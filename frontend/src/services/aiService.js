@@ -1,5 +1,4 @@
-import 'dotenv/config';
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
 function handleResponse(res) {
   if (res.status !== 200) {
@@ -11,6 +10,10 @@ function handleResponse(res) {
 }
 
 export async function chat(userMessage) {
+  if (!OPENAI_API_KEY) {
+    throw new Error("OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.");
+  }
+
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
