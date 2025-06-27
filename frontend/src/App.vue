@@ -8,17 +8,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
+import { chat } from "./services/aiService.js";
 
-const message = ref("Loading...");
+const messages = ref([]);
+const newMessage = ref("");
+const isLoading = ref(false);
 
-onMounted(async () => {
+const sendMessage = async () => {
+  if (!newMessage.value.trim() || isLoading.value) return;
+
+  const userMessage = newMessage.value.trim();
+  
+  // Add user message
+  messages.value.push({
+    role: "user",
+    content: userMessage,
+  });
+
+  newMessage.value = "";
+  isLoading.value = true;
+
   try {
-    const res = await fetch("http://localhost:3000/api/hello");
-    const data = await res.json();
-    message.value = data.message;
-  } catch (err) {
-    message.value = "Failed to fetch backend";
+    // Call AI API
+    const response = await chat(userMessage);
+    
+    // Add AI reply
+    messages.value.push({
+      role: "assistant",
+      content: response.reply,
+    });
+  } catch (error) {
+    console.error("Failed to send message:", error);
+    
+    // Add error message
+    messages.value.push({
+      role: "assistant",
+      content: "Sorry, I encountered an error. Please try again later.",
+    });
+  } finally {
+    isLoading.value = false;
   }
-});
+};
 </script>
