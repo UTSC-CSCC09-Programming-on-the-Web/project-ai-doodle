@@ -4,18 +4,31 @@
     <p class="mt-2 text-gray-700">
       Plase complete the payment to continue using AI Doodle.
     </p>
-    <button
-      class="mt-6 px-4 py-2 bg-blue-600 text-white rounded"
-      @click="goToCheckout"
-    >
-      Subscribe with Stripe
-    </button>
-    <button
-      class="mt-4 ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-      @click="logout"
-    >
-      Logout
-    </button>
+    <div class="mt-8 flex flex-col items-center space-y-6">
+      <button
+        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg w-64"
+        @click="goToCheckout"
+      >
+        Subscribe with Stripe
+      </button>
+      
+      
+      <button
+        @click="goToImageGeneration"
+        class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-lg w-64"
+      >
+        🎨 AI Image Generator
+      </button>
+      
+      <div class="mt-8">
+        <button
+          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+          @click="logout"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -23,6 +36,10 @@
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+
+const goToImageGeneration = () => {
+  router.push("/generate");
+};
 
 async function goToCheckout() {
   try {

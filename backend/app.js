@@ -1,3 +1,7 @@
+// 禁用 SSL 证书验证（仅用于开发环境）
+import https from "https";
+https.globalAgent.options.rejectUnauthorized = false;
+
 import express from "express";
 import session from "express-session";
 import passport from "passport";

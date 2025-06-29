@@ -3,12 +3,14 @@
     <h1 class="text-3xl font-bold text-blue-600">Welcome Home</h1>
     <p class="mt-4 text-gray-700">You are logged in and subscribed!</p>
 
-    <button
-      @click="logout"
-      class="mt-6 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-    >
-      Logout
-    </button>
+    <div class="mt-8">
+      <button
+        @click="logout"
+        class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
+        Logout
+      </button>
+    </div>
   </div>
 </template>
 

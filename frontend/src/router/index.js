@@ -3,12 +3,14 @@ import Login from "../views/Login.vue";
 import Subscribe from "../views/Subscribe.vue";
 import Home from "../views/Home.vue";
 import AuthRedirect from "../views/AuthRedirect.vue";
+import ImageGeneration from "../views/ImageGeneration.vue";
 
 const routes = [
   { path: "/", component: AuthRedirect },
   { path: "/login", component: Login },
   { path: "/subscribe", component: Subscribe },
   { path: "/home", component: Home },
+  { path: "/generate", component: ImageGeneration },
 ];
 
 const router = createRouter({
