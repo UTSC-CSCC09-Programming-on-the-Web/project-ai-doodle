@@ -2,8 +2,9 @@
   <div class="p-10 text-center">
     <h2 class="text-2xl font-semibold text-red-600">Subscription Required</h2>
     <p class="mt-2 text-gray-700">
-      Plase complete the payment to continue using AI Doodle.
+      Please complete the payment to continue using AI Doodle.
     </p>
+
     <div class="mt-8 flex flex-col items-center space-y-6">
       <button
         class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg w-64"
@@ -11,19 +12,18 @@
       >
         Subscribe with Stripe
       </button>
-      
-      
+
       <button
         @click="goToImageGeneration"
         class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-lg w-64"
       >
         🎨 AI Image Generator
       </button>
-      
+
       <div class="mt-8">
         <button
           class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-          @click="logout"
+          @click="handleLogout"
         >
           Logout
         </button>
@@ -34,6 +34,8 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+import { createStripeCheckout, logout, getCurrentUser } from "../services/api-service";
+import { onMounted } from "vue";
 
 const router = useRouter();
 
@@ -41,32 +43,35 @@ const goToImageGeneration = () => {
   router.push("/generate");
 };
 
-async function goToCheckout() {
+const goToCheckout = async () => {
   try {
-    const res = await fetch("http://localhost:3000/api/stripe/checkout", {
-      method: "POST",
-      credentials: "include",
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
+    const { url } = await createStripeCheckout();
+    if (url) {
+      window.location.href = url;
     } else {
-      alert("Failed to redirect to Stripe Checkout");
+      alert("Stripe Checkout URL missing");
     }
   } catch (err) {
-    console.error("Error during checkout:", err);
+    console.error("Checkout error:", err);
     alert("Checkout failed");
   }
-}
+};
 
-async function logout() {
+const handleLogout = async () => {
   try {
-    await fetch("http://localhost:3000/api/auth/logout", {
-      credentials: "include",
-    });
+    await logout();
     router.push("/login");
   } catch (err) {
-    alert("Logout failed.");
+    console.error("Logout error:", err);
+    alert("Logout failed");
   }
-}
+};
+
+onMounted(async () => {
+  try {
+    await fetchUser();
+  } catch (err) {
+    router.push("/login");
+  }
+});
 </script>

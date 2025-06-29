@@ -5,7 +5,7 @@
 
     <div class="mt-8">
       <button
-        @click="logout"
+        @click="handleLogout"
         class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
       >
         Logout
@@ -16,18 +16,25 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+import { logout, getCurrentUser } from "../services/api-service";
+import { onMounted } from "vue";
 
 const router = useRouter();
 
-const logout = async () => {
+const handleLogout = async () => {
   try {
-    await fetch("http://localhost:3000/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+    await logout();
     router.push("/login");
   } catch (err) {
     console.error("Logout failed:", err);
   }
 };
+
+onMounted(async () => {
+  try {
+    await getCurrentUser();
+  } catch (err) {
+    router.push("/login");
+  }
+});
 </script>
