@@ -29,3 +29,27 @@ export async function createStripeCheckout() {
   if (!res.ok) throw new Error("Failed to create Stripe session");
   return res.json();
 }
+
+export async function createRoom(roomData) {
+  const res = await fetch(`${API_BASE}/rooms`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(roomData),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Room creation failed");
+  }
+  return await res.json();
+}
+
+export async function getRoomById(id) {
+  const res = await fetch(`${API_BASE}/rooms/${id}`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to fetch room");
+  return res.json();
+}

@@ -47,15 +47,40 @@
         </details>
       </div>
     </div>
+
+    <div class="mt-10 text-left max-w-3xl mx-auto bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-semibold mb-4">Create a Room</h2>
+      
+      <form @submit.prevent="handleCreateRoom" class="space-y-4">
+        <div>
+          <label class="block font-medium mb-1">Room Name</label>
+          <input v-model="newRoom.name" required type="text" class="w-full p-2 border rounded" />
+        </div>
+        <div>
+          <label class="block font-medium mb-1">Passcode</label>
+          <input v-model="newRoom.passcode" required type="password" class="w-full p-2 border rounded" />
+        </div>
+        <div>
+          <label class="block font-medium mb-1">Capacity</label>
+          <input v-model.number="newRoom.capacity" required type="number" min="2" max="10" class="w-full p-2 border rounded" />
+        </div>
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">
+          Create Room
+        </button>
+      </form>
+
+      <p v-if="createStatus" class="mt-4 text-sm text-green-600 font-medium">{{ createStatus }}</p>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from "vue-router";
-import { logout, getCurrentUser } from "../services/api-service";
+import { logout, getCurrentUser, createRoom  } from "../services/api-service";
 import { ref, onMounted } from "vue";
 
 const router = useRouter();
+const user = ref(null);
 const showRules = ref(false);
 
 function goToGenerate() {
@@ -71,9 +96,32 @@ const handleLogout = async () => {
   }
 };
 
+const newRoom = ref({
+  name: "",
+  passcode: "",
+  capacity: 4,
+});
+
+const createStatus = ref("");
+
+const handleCreateRoom = async () => {
+  try {
+    const roomData = {
+      ...newRoom.value,
+      creatorUsername: user.value.username,
+    };
+    const res = await createRoom(roomData);
+    createStatus.value = `Room "${res.name}" created successfully!`;
+    router.push(`/room/${res.id}`);
+  } catch (err) {
+    createStatus.value = err?.response?.data?.error || "Room creation failed";
+  }
+};
+
 onMounted(async () => {
   try {
-    await getCurrentUser();
+    const data = await getCurrentUser();
+    user.value = data;
   } catch (err) {
     router.push("/login");
   }

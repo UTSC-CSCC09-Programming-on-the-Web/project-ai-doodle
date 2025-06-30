@@ -1,4 +1,3 @@
-// 禁用 SSL 证书验证（仅用于开发环境）
 import https from "https";
 https.globalAgent.options.rejectUnauthorized = false;
 
@@ -11,6 +10,7 @@ dotenv.config();
 import "./auth/passport.js";
 import { authRouter } from "./routers/auth_router.js";
 import { stripeRouter } from "./routers/stripe_router.js";
+import { roomRouter } from "./routers/room_router.js";
 
 import { testConnection, sequelize } from "./models/datasource.js";
 
@@ -57,6 +57,7 @@ app.get("/api/hello", (req, res) => {
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api/stripe", stripeRouter);
+app.use("/api/rooms", roomRouter);
 
 const init = async () => {
   await testConnection();

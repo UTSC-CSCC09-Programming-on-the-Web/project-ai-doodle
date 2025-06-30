@@ -4,6 +4,7 @@ import Subscribe from "../views/Subscribe.vue";
 import Home from "../views/Home.vue";
 import AuthRedirect from "../views/AuthRedirect.vue";
 import ImageGeneration from "../views/ImageGeneration.vue";
+import Game from "../views/Game.vue";
 
 const routes = [
   { path: "/", component: AuthRedirect },
@@ -11,6 +12,7 @@ const routes = [
   { path: "/subscribe", component: Subscribe },
   { path: "/home", component: Home },
   { path: "/generate", component: ImageGeneration },
+  { path: "/room/:id", component: Game },
 ];
 
 const router = createRouter({
