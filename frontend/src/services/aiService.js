@@ -11,7 +11,9 @@ function handleResponse(res) {
 
 export async function chat(userMessage) {
   if (!OPENAI_API_KEY) {
-    throw new Error("OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.");
+    throw new Error(
+      "OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.",
+    );
   }
 
   try {
@@ -44,4 +46,4 @@ export async function chat(userMessage) {
     console.error("Error during API call:", error);
     throw error;
   }
-} 
+}

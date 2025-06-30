@@ -1,10 +1,5 @@
 <template>
-  <!-- Just for quick checking that both ends are working -->
-  <div class="p-10 text-center">
-    <h1 class="text-3xl font-bold text-green-600">Frontend is working</h1>
-    <p class="mt-4 text-gray-700">Backend says: {{ message }}</p>
-    <router-view />
-  </div>
+  <router-view />
 </template>
 
 <script setup>
@@ -19,7 +14,7 @@ const sendMessage = async () => {
   if (!newMessage.value.trim() || isLoading.value) return;
 
   const userMessage = newMessage.value.trim();
-  
+
   // Add user message
   messages.value.push({
     role: "user",
@@ -32,7 +27,7 @@ const sendMessage = async () => {
   try {
     // Call AI API
     const response = await chat(userMessage);
-    
+
     // Add AI reply
     messages.value.push({
       role: "assistant",
@@ -40,7 +35,7 @@ const sendMessage = async () => {
     });
   } catch (error) {
     console.error("Failed to send message:", error);
-    
+
     // Add error message
     messages.value.push({
       role: "assistant",

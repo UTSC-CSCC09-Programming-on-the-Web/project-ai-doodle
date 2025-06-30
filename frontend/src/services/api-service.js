@@ -1,0 +1,55 @@
+const API_BASE = "http://localhost:3000/api";
+
+export async function getCurrentUser() {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Not authenticated");
+  return res.json();
+}
+
+export async function logout() {
+  const res = await fetch(`${API_BASE}/auth/logout`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Logout failed");
+  return res.json();
+}
+
+export function getGoogleLoginUrl() {
+  return `${API_BASE}/auth/google`;
+}
+
+export async function createStripeCheckout() {
+  const res = await fetch(`${API_BASE}/stripe/checkout`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error("Failed to create Stripe session");
+  return res.json();
+}
+
+export async function createRoom(roomData) {
+  const res = await fetch(`${API_BASE}/rooms`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(roomData),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Room creation failed");
+  }
+  return await res.json();
+}
+
+export async function getRoomById(id) {
+  const res = await fetch(`${API_BASE}/rooms/${id}`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to fetch room");
+  return res.json();
+}

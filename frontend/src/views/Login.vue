@@ -1,26 +1,45 @@
 <template>
   <div class="p-6 text-center">
-    <h1 class="text-2xl font-bold mb-4">AI Doodle Login</h1>
+    <h1 class="text-2xl font-bold mb-4">
+      {{ user ? `Welcome, ${user.username}!` : "AI Doodle Login" }}
+    </h1>
+
     <div v-if="user">
-      <p class="mb-2">Hello, {{ user.username }}!</p>
       <p class="mb-4">
         Subscription: {{ user.isSubscribed ? "Active" : "Inactive" }}
       </p>
+
       <button
         v-if="!user.isSubscribed"
         @click="goToSubscribe"
-        class="bg-purple-600 text-white px-4 py-2 rounded"
+        class="bg-purple-600 text-white px-4 py-2 rounded mb-2"
       >
         Subscribe Now
       </button>
-      <button @click="logout" class="bg-red-500 text-white px-4 py-2 rounded">
+
+      <button
+        v-if="user.isSubscribed"
+        @click="goToHome"
+        class="bg-green-600 text-white px-4 py-2 rounded mb-2"
+      >
+        Go to Home
+      </button>
+
+      <button
+        @click="handleLogout"
+        class="bg-red-500 text-white px-4 py-2 rounded"
+      >
         Logout
       </button>
     </div>
+
     <div v-else>
-      <a :href="googleAuthUrl" class="bg-blue-600 text-white px-4 py-2 rounded"
-        >Login with Google</a
+      <a
+        :href="getGoogleLoginUrl()"
+        class="bg-blue-600 text-white px-4 py-2 rounded"
       >
+        Login with Google
+      </a>
     </div>
   </div>
 </template>
@@ -28,30 +47,40 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import {
+  getCurrentUser,
+  logout,
+  getGoogleLoginUrl,
+} from "../services/api-service";
 
 const user = ref(null);
 const router = useRouter();
-const googleAuthUrl = "http://localhost:3000/api/auth/google";
 
 async function fetchUser() {
-  const res = await fetch("http://localhost:3000/api/auth/me", {
-    credentials: "include",
-  });
-  if (res.ok) {
-    user.value = await res.json();
+  try {
+    const data = await getCurrentUser();
+    user.value = data;
+  } catch (err) {
+    user.value = null;
   }
 }
 
-async function logout() {
-  await fetch("http://localhost:3000/api/auth/logout", {
-    credentials: "include",
-  });
-  user.value = null;
-  router.push("/login");
+async function handleLogout() {
+  try {
+    await logout();
+    user.value = null;
+    router.push("/login");
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
 }
 
 function goToSubscribe() {
   router.push("/subscribe");
+}
+
+function goToHome() {
+  router.push("/home");
 }
 
 onMounted(fetchUser);
