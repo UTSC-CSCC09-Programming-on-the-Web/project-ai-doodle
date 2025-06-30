@@ -1,12 +1,21 @@
 <template>
   <div class="p-10 text-center">
-    <h2 class="text-2xl font-semibold text-red-600">Subscription Required</h2>
+    <h2
+      class="text-2xl font-semibold"
+      :class="user?.isSubscribed ? 'text-green-600' : 'text-red-600'"
+    >
+      {{ user?.isSubscribed ? `${user.username}, you are already subscribed!` : 'Subscription Required' }}
+    </h2>
+
     <p class="mt-2 text-gray-700">
-      Please complete the payment to continue using AI Doodle.
+      {{ user?.isSubscribed
+        ? 'Click below to go to the main application.'
+        : 'Please complete the payment to continue using AI Doodle.' }}
     </p>
 
     <div class="mt-8 flex flex-col items-center space-y-6">
       <button
+        v-if="!user?.isSubscribed"
         class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg w-64"
         @click="goToCheckout"
       >
@@ -14,10 +23,11 @@
       </button>
 
       <button
-        @click="goToImageGeneration"
+        v-if="user?.isSubscribed"
+        @click="goToHome"
         class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-lg w-64"
       >
-        🎨 AI Image Generator
+        Go to Home
       </button>
 
       <div class="mt-8">
@@ -35,12 +45,13 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { createStripeCheckout, logout, getCurrentUser } from "../services/api-service";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
 const router = useRouter();
+const user = ref(null);
 
-const goToImageGeneration = () => {
-  router.push("/generate");
+const goToHome = () => {
+  router.push("/home");
 };
 
 const goToCheckout = async () => {
@@ -69,7 +80,8 @@ const handleLogout = async () => {
 
 onMounted(async () => {
   try {
-    await fetchUser();
+    const data = await getCurrentUser();
+    user.value = data;
   } catch (err) {
     router.push("/login");
   }

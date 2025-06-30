@@ -121,7 +121,7 @@ const isLoading = ref(false);
 const error = ref('');
 
 const goBack = () => {
-  router.push('/subscribe');
+  router.push('/home');
 };
 
 const generateImage = async () => {

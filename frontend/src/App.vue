@@ -1,8 +1,5 @@
 <template>
-  <div class="p-10 text-center">
-    <h1 class="text-3xl font-bold text-green-600">Frontend is working</h1>
-    <router-view />
-  </div>
+  <router-view />
 </template>
 
 <script setup>

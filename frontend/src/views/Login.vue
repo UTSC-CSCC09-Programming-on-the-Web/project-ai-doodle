@@ -1,19 +1,30 @@
 <template>
   <div class="p-6 text-center">
-    <h1 class="text-2xl font-bold mb-4">AI Doodle Login</h1>
+    <h1 class="text-2xl font-bold mb-4">
+      {{ user ? `Welcome, ${user.username}!` : "AI Doodle Login" }}
+    </h1>
 
     <div v-if="user">
-      <p class="mb-2">Hello, {{ user.username }}!</p>
       <p class="mb-4">
         Subscription: {{ user.isSubscribed ? "Active" : "Inactive" }}
       </p>
+
       <button
         v-if="!user.isSubscribed"
         @click="goToSubscribe"
-        class="bg-purple-600 text-white px-4 py-2 rounded"
+        class="bg-purple-600 text-white px-4 py-2 rounded mb-2"
       >
         Subscribe Now
       </button>
+
+      <button
+        v-if="user.isSubscribed"
+        @click="goToHome"
+        class="bg-green-600 text-white px-4 py-2 rounded mb-2"
+      >
+        Go to Home
+      </button>
+
       <button @click="handleLogout" class="bg-red-500 text-white px-4 py-2 rounded">
         Logout
       </button>
@@ -56,6 +67,10 @@ async function handleLogout() {
 
 function goToSubscribe() {
   router.push("/subscribe");
+}
+
+function goToHome() {
+  router.push("/home");
 }
 
 onMounted(fetchUser);
