@@ -14,7 +14,7 @@ const sendMessage = async () => {
   if (!newMessage.value.trim() || isLoading.value) return;
 
   const userMessage = newMessage.value.trim();
-  
+
   // Add user message
   messages.value.push({
     role: "user",
@@ -27,7 +27,7 @@ const sendMessage = async () => {
   try {
     // Call AI API
     const response = await chat(userMessage);
-    
+
     // Add AI reply
     messages.value.push({
       role: "assistant",
@@ -35,7 +35,7 @@ const sendMessage = async () => {
     });
   } catch (error) {
     console.error("Failed to send message:", error);
-    
+
     // Add error message
     messages.value.push({
       role: "assistant",

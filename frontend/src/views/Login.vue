@@ -25,13 +25,19 @@
         Go to Home
       </button>
 
-      <button @click="handleLogout" class="bg-red-500 text-white px-4 py-2 rounded">
+      <button
+        @click="handleLogout"
+        class="bg-red-500 text-white px-4 py-2 rounded"
+      >
         Logout
       </button>
     </div>
 
     <div v-else>
-      <a :href="getGoogleLoginUrl()" class="bg-blue-600 text-white px-4 py-2 rounded">
+      <a
+        :href="getGoogleLoginUrl()"
+        class="bg-blue-600 text-white px-4 py-2 rounded"
+      >
         Login with Google
       </a>
     </div>
@@ -41,7 +47,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { getCurrentUser, logout, getGoogleLoginUrl } from "../services/api-service";
+import {
+  getCurrentUser,
+  logout,
+  getGoogleLoginUrl,
+} from "../services/api-service";
 
 const user = ref(null);
 const router = useRouter();

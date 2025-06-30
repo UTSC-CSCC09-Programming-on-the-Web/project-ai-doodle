@@ -4,13 +4,19 @@
       class="text-2xl font-semibold"
       :class="user?.isSubscribed ? 'text-green-600' : 'text-red-600'"
     >
-      {{ user?.isSubscribed ? `${user.username}, you are already subscribed!` : 'Subscription Required' }}
+      {{
+        user?.isSubscribed
+          ? `${user.username}, you are already subscribed!`
+          : "Subscription Required"
+      }}
     </h2>
 
     <p class="mt-2 text-gray-700">
-      {{ user?.isSubscribed
-        ? 'Click below to go to the main application.'
-        : 'Please complete the payment to continue using AI Doodle.' }}
+      {{
+        user?.isSubscribed
+          ? "Click below to go to the main application."
+          : "Please complete the payment to continue using AI Doodle."
+      }}
     </p>
 
     <div class="mt-8 flex flex-col items-center space-y-6">
@@ -44,7 +50,11 @@
 
 <script setup>
 import { useRouter } from "vue-router";
-import { createStripeCheckout, logout, getCurrentUser } from "../services/api-service";
+import {
+  createStripeCheckout,
+  logout,
+  getCurrentUser,
+} from "../services/api-service";
 import { onMounted, ref } from "vue";
 
 const router = useRouter();

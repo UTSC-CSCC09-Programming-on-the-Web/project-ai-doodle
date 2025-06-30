@@ -25,7 +25,9 @@ roomRouter.post("/", async (req, res) => {
 
     res.status(200).json(newRoom);
   } catch (err) {
-    res.status(500).json({ error: "Failed to create room", details: err.message });
+    res
+      .status(500)
+      .json({ error: "Failed to create room", details: err.message });
   }
 });
 
@@ -37,7 +39,9 @@ roomRouter.get("/by-name/:name", async (req, res) => {
     }
     res.status(200).json(room);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch room", details: err.message });
+    res
+      .status(500)
+      .json({ error: "Failed to fetch room", details: err.message });
   }
 });
 
@@ -50,7 +54,9 @@ roomRouter.get("/:id", async (req, res) => {
     const { passcode, ...safeRoomData } = room.toJSON();
     res.status(200).json(safeRoomData);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch room", details: err.message });
+    res
+      .status(500)
+      .json({ error: "Failed to fetch room", details: err.message });
   }
 });
 
@@ -72,8 +78,12 @@ roomRouter.post("/join", async (req, res) => {
     }
 
     const { passcode, ...safeRoomData } = room.toJSON();
-    return res.status(200).json({ message: "Joined successfully", room: safeRoomData });
+    return res
+      .status(200)
+      .json({ message: "Joined successfully", room: safeRoomData });
   } catch (err) {
-    return res.status(500).json({ error: "Failed to join room", details: err.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to join room", details: err.message });
   }
 });

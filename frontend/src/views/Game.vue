@@ -3,8 +3,12 @@
     <h1 class="text-3xl font-bold text-blue-700 mb-4">
       Game Room - {{ room?.name || "Loading..." }}
     </h1>
-    <p class="text-gray-700 mb-2">Room ID: <span class="font-mono text-lg">{{ roomId }}</span></p>
-    <p class="text-gray-700 mb-6">Player: <span class="font-semibold">{{ user?.username }}</span></p>
+    <p class="text-gray-700 mb-2">
+      Room ID: <span class="font-mono text-lg">{{ roomId }}</span>
+    </p>
+    <p class="text-gray-700 mb-6">
+      Player: <span class="font-semibold">{{ user?.username }}</span>
+    </p>
 
     <div class="bg-gray-100 p-6 rounded shadow">
       <p class="text-lg text-gray-600 mb-4">Game logic goes here...</p>
