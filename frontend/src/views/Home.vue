@@ -47,27 +47,27 @@
           <strong>4. Final Guess:</strong> The last player guesses the original
           word (or a synonym).
         </p>
-        <p><strong>5. If Correct:</strong> All players except the Spy win.</p>
-        <p>
-          <strong>6. If Incorrect:</strong> Everyone will see the chain of
-          generated pictures and vote on who is the Spy.
-        </p>
-        <p>
-          <strong>7. Voting Result:</strong> If the Spy is found, the rest win;
-          otherwise, the Spy wins.
-        </p>
+        <ul class="list-disc list-inside ml-6 text-gray-700">
+          <li><strong>If correct:</strong> All players except the Spy win.</li>
+          <li>
+            <strong>If incorrect:</strong> Everyone sees the full image chain and votes on who is the Spy.
+            <ul class="list-disc list-inside ml-6 mt-1">
+              <li>If the Spy is found, the rest win; otherwise, the Spy wins.</li>
+            </ul>
+          </li>
+        </ul>
 
         <details class="mt-4">
           <summary class="cursor-pointer text-blue-600 hover:underline">
             Click for more details
           </summary>
           <ul class="list-disc list-inside mt-2 space-y-1">
-            <li>The Spy never sees the original word.</li>
+            <li>The Spy never sees the original word (not the first player).</li>
             <li>
               Each player can only see the previous image, not the full chain.
             </li>
             <li>
-              Prompts should not directly reveal the secret word or synonyms.
+              Prompts should not directly reveal the secret word or synonyms (must be descriptive).
             </li>
             <li>Final guesses must be reasonable synonyms to be accepted.</li>
             <li>Voting is anonymous and majority rules.</li>
@@ -95,17 +95,6 @@
             v-model="newRoom.passcode"
             required
             type="password"
-            class="w-full p-2 border rounded"
-          />
-        </div>
-        <div>
-          <label class="block font-medium mb-1">Capacity</label>
-          <input
-            v-model.number="newRoom.capacity"
-            required
-            type="number"
-            min="2"
-            max="10"
             class="w-full p-2 border rounded"
           />
         </div>
@@ -149,7 +138,6 @@ const handleLogout = async () => {
 const newRoom = ref({
   name: "",
   passcode: "",
-  capacity: 4,
 });
 
 const createStatus = ref("");

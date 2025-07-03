@@ -4,9 +4,9 @@ import { Room } from "../models/rooms.js";
 export const roomRouter = Router();
 
 roomRouter.post("/", async (req, res) => {
-  const { name, passcode, capacity, creatorUsername } = req.body;
+  const { name, passcode, creatorUsername } = req.body;
 
-  if (!name || !passcode || !capacity || !creatorUsername) {
+  if (!name || !passcode || !creatorUsername) {
     return res.status(422).json({ error: "Missing required fields" });
   }
 
@@ -19,7 +19,6 @@ roomRouter.post("/", async (req, res) => {
     const newRoom = await Room.create({
       name,
       passcode,
-      capacity,
       creatorUsername,
     });
 
