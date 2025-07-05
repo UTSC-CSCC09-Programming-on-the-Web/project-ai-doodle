@@ -7,6 +7,8 @@ import passport from "passport";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
+import http from "http";
+import { setupSocket } from "./socket/socket.js";
 import "./auth/passport.js";
 import { authRouter } from "./routers/auth_router.js";
 import { stripeRouter } from "./routers/stripe_router.js";
@@ -16,6 +18,7 @@ import { testConnection, sequelize } from "./models/datasource.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
 
 app.use(
   cors({
@@ -63,9 +66,11 @@ const init = async () => {
   await testConnection();
   await sequelize.sync({ alter: true });
 
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
+
+  setupSocket(server);
 };
 
 init();
