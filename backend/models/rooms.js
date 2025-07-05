@@ -12,9 +12,6 @@ export const Room = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    capacity: {
-      type: DataTypes.INTEGER,
-    },
     creatorUsername: {
       type: DataTypes.STRING,
       allowNull: false,
