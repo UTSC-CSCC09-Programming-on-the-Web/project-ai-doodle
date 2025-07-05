@@ -13,7 +13,10 @@
     <p class="text-gray-700 mb-2">
       Room ID: <span class="font-mono text-lg">{{ roomId }}</span>
     </p>
-    <p v-if="room && user && room.creatorUsername === user.username" class="text-gray-700 mb-2">
+    <p
+      v-if="room && user && room.creatorUsername === user.username"
+      class="text-gray-700 mb-2"
+    >
       Room Passcode: <span class="font-mono text-lg">{{ room.passcode }}</span>
     </p>
     <p class="text-gray-700 mb-6">
@@ -30,7 +33,10 @@
         >
           <span>
             {{ u.username }}
-            <span v-if="u.username === room?.creatorUsername" class="text-sm text-blue-500 ml-1">
+            <span
+              v-if="u.username === room?.creatorUsername"
+              class="text-sm text-blue-500 ml-1"
+            >
               (Host)
             </span>
           </span>
@@ -51,7 +57,7 @@
 
       <button
         v-if="user?.username === room?.creatorUsername"
-        :disabled="!users.length || !users.every(u => u.ready)"
+        :disabled="!users.length || !users.every((u) => u.ready)"
         @click="startGame"
         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
       >
@@ -95,7 +101,9 @@ onMounted(async () => {
 
     socket.on("roomUpdate", (roomUsers) => {
       users.value = roomUsers;
-      const currentUser = roomUsers.find(u => u.username === user.value.username);
+      const currentUser = roomUsers.find(
+        (u) => u.username === user.value.username,
+      );
       if (currentUser) {
         ready.value = currentUser.ready;
       }

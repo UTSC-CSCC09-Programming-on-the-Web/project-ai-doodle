@@ -50,10 +50,14 @@ roomRouter.post("/join", async (req, res) => {
     const roomData = room.toJSON();
     delete roomData.passcode;
 
-    return res.status(200).json({ message: "Joined successfully", room: roomData });
+    return res
+      .status(200)
+      .json({ message: "Joined successfully", room: roomData });
   } catch (err) {
     console.error("Join room error:", err);
-    return res.status(500).json({ error: "Failed to join room", details: err.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to join room", details: err.message });
   }
 });
 

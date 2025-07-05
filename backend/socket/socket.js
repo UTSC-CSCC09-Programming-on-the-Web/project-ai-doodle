@@ -11,7 +11,6 @@ export function setupSocket(server) {
   });
 
   io.on("connection", (socket) => {
-
     socket.on("joinRoom", async ({ roomId, username }) => {
       socket.join(roomId);
 

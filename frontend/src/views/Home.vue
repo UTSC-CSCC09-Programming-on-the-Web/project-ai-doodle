@@ -50,9 +50,12 @@
         <ul class="list-disc list-inside ml-6 text-gray-700">
           <li><strong>If correct:</strong> All players except the Spy win.</li>
           <li>
-            <strong>If incorrect:</strong> Everyone sees the full image chain and votes on who is the Spy.
+            <strong>If incorrect:</strong> Everyone sees the full image chain
+            and votes on who is the Spy.
             <ul class="list-disc list-inside ml-6 mt-1">
-              <li>If the Spy is found, the rest win; otherwise, the Spy wins.</li>
+              <li>
+                If the Spy is found, the rest win; otherwise, the Spy wins.
+              </li>
             </ul>
           </li>
         </ul>
@@ -62,12 +65,15 @@
             Click for more details
           </summary>
           <ul class="list-disc list-inside mt-2 space-y-1">
-            <li>The Spy never sees the original word (not the first player).</li>
+            <li>
+              The Spy never sees the original word (not the first player).
+            </li>
             <li>
               Each player can only see the previous image, not the full chain.
             </li>
             <li>
-              Prompts should not directly reveal the secret word or synonyms (must be descriptive).
+              Prompts should not directly reveal the secret word or synonyms
+              (must be descriptive).
             </li>
             <li>Final guesses must be reasonable synonyms to be accepted.</li>
             <li>Voting is anonymous and majority rules.</li>
@@ -152,7 +158,12 @@
 
 <script setup>
 import { useRouter } from "vue-router";
-import { logout, getCurrentUser, createRoom, joinRoomByName } from "../services/api-service";
+import {
+  logout,
+  getCurrentUser,
+  createRoom,
+  joinRoomByName,
+} from "../services/api-service";
 import { ref, onMounted } from "vue";
 
 const router = useRouter();
