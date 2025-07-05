@@ -6,6 +6,9 @@
     <p class="text-gray-700 mb-2">
       Room ID: <span class="font-mono text-lg">{{ roomId }}</span>
     </p>
+    <p v-if="room && user && room.creatorUsername === user.username" class="text-gray-700 mb-2">
+      Room Passcode: <span class="font-mono text-lg">{{ room.passcode }}</span>
+    </p>
     <p class="text-gray-700 mb-6">
       Player: <span class="font-semibold">{{ user?.username }}</span>
     </p>

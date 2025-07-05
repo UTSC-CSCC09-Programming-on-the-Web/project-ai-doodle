@@ -77,6 +77,43 @@
     </div>
 
     <div class="mt-10 text-left max-w-3xl mx-auto bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-semibold mb-4">Join Existing Room</h2>
+
+      <form @submit.prevent="handleJoinRoom" class="space-y-4">
+        <div>
+          <label class="block font-medium mb-1">Room Name</label>
+          <input
+            v-model="joinName"
+            required
+            type="text"
+            class="w-full p-2 border rounded"
+            placeholder="Enter room name"
+          />
+        </div>
+        <div>
+          <label class="block font-medium mb-1">Passcode</label>
+          <input
+            v-model="joinPasscode"
+            required
+            type="password"
+            class="w-full p-2 border rounded"
+            placeholder="Enter passcode"
+          />
+        </div>
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded"
+        >
+          Join Room
+        </button>
+      </form>
+
+      <p v-if="joinError" class="mt-4 text-sm text-red-600 font-medium">
+        {{ joinError }}
+      </p>
+    </div>
+
+    <div class="mt-10 text-left max-w-3xl mx-auto bg-white p-6 rounded shadow">
       <h2 class="text-xl font-semibold mb-4">Create a Room</h2>
 
       <form @submit.prevent="handleCreateRoom" class="space-y-4">
@@ -115,12 +152,15 @@
 
 <script setup>
 import { useRouter } from "vue-router";
-import { logout, getCurrentUser, createRoom } from "../services/api-service";
+import { logout, getCurrentUser, createRoom, joinRoomByName } from "../services/api-service";
 import { ref, onMounted } from "vue";
 
 const router = useRouter();
 const user = ref(null);
 const showRules = ref(false);
+const joinName = ref("");
+const joinPasscode = ref("");
+const joinError = ref("");
 
 function goToGenerate() {
   router.push("/generate");
@@ -153,6 +193,16 @@ const handleCreateRoom = async () => {
     router.push(`/room/${res.id}`);
   } catch (err) {
     createStatus.value = err?.response?.data?.error || "Room creation failed";
+  }
+};
+
+const handleJoinRoom = async () => {
+  joinError.value = "";
+  try {
+    const res = await joinRoomByName(joinName.value, joinPasscode.value);
+    router.push(`/room/${res.id}`);
+  } catch (err) {
+    joinError.value = err?.message || "Failed to join room";
   }
 };
 

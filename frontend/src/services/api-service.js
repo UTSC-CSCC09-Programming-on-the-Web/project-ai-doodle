@@ -53,3 +53,17 @@ export async function getRoomById(id) {
   if (!res.ok) throw new Error("Failed to fetch room");
   return res.json();
 }
+
+export async function joinRoomByName(name, passcode) {
+  const res = await fetch(`${API_BASE}/rooms/join`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, passcode }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to join room");
+
+  return data.room;
+}
