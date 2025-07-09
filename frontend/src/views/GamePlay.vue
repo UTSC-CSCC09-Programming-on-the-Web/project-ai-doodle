@@ -133,7 +133,7 @@
         <div class="bg-blue-50 p-4 rounded-lg mb-4">
           <h3 class="font-semibold text-blue-800 mb-2">Players ({{ users.length }})</h3>
           <ul class="space-y-2">
-            <li v-for="(u, index) in users" :key="u.username" 
+            <li v-for="(u, index) in orderedPlayers" :key="u.username" 
                 class="flex justify-between items-center text-sm">
               <span class="flex items-center">
                 <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2">
@@ -293,7 +293,7 @@
         <div class="bg-blue-50 p-4 rounded-lg mb-4">
           <h3 class="font-semibold text-blue-800 mb-2">Players ({{ users.length }})</h3>
           <ul class="space-y-2">
-            <li v-for="(u, index) in users" :key="u.username" 
+            <li v-for="(u, index) in orderedPlayers" :key="u.username" 
                 class="flex justify-between items-center text-sm">
               <span class="flex items-center">
                 <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2">
@@ -444,7 +444,7 @@
         <div class="bg-blue-50 p-4 rounded-lg mb-4">
           <h3 class="font-semibold text-blue-800 mb-2">Players ({{ users.length }})</h3>
           <ul class="space-y-2">
-            <li v-for="(u, index) in users" :key="u.username" 
+            <li v-for="(u, index) in orderedPlayers" :key="u.username" 
                 class="flex justify-between items-center text-sm">
               <span class="flex items-center">
                 <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2">
@@ -618,6 +618,7 @@ const showSecretWord = ref(false);
 const isSpy = ref(false);
 const isFirstPlayer = ref(false);
 const showPreviousImage = ref(true);
+const playerOrder = ref([]);
 
 // Image state
 const previousImage = ref("");
@@ -646,7 +647,15 @@ const finalGuessResult = ref("");
 const prompt = ref("");
 
 // Computed properties
-const totalPlayers = computed(() => users.value.length);
+const orderedPlayers = computed(() => {
+  if (playerOrder.value.length === 0 || users.value.length === 0) {
+    return users.value;
+  }
+
+  return playerOrder.value
+    .map(name => users.value.find(u => u.username === name))
+    .filter(Boolean);
+});
 
 // Reference image logic - what should be shown in the left column
 const referenceImage = computed(() => {
@@ -698,6 +707,7 @@ onMounted(async () => {
       isSpy.value = gameState.isSpy || false;
       isFirstPlayer.value = gameState.isFirstPlayer || false;
       showPreviousImage.value = gameState.showPreviousImage !== false; // Default to true if not specified
+      playerOrder.value = gameState.playerOrder || [];
       
       // Show secret word only if provided by server
       showSecretWord.value = !!gameState.secretWord;

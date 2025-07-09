@@ -126,8 +126,14 @@ export function setupSocket(server) {
 
       // Initialize game state
       const secretWord = SECRET_WORDS[Math.floor(Math.random() * SECRET_WORDS.length)];
-      const spyIndex = Math.floor(Math.random() * users.length);
-      const spyUsername = users[spyIndex].username;
+      // Shuffle player order
+      const shuffledUsers = [...users].sort(() => Math.random() - 0.5);
+      const playerOrder = shuffledUsers.map(u => u.username);
+
+      // Select a spy
+      const spyCandidates = shuffledUsers.slice(1, -1); // exclude first and last
+      const spyIndex = Math.floor(Math.random() * spyCandidates.length);
+      const spyUsername = spyCandidates[spyIndex].username;
       
       // Find first non-spy player to start
       let firstPlayerIndex = 0;
@@ -139,10 +145,10 @@ export function setupSocket(server) {
         roomId,
         secretWord,
         spyUsername,
-        currentPlayer: users[firstPlayerIndex].username,
+        currentPlayer: playerOrder[firstPlayerIndex],
         turn: 1,
-        totalTurns: users.length,
-        playerOrder: users.map(u => u.username),
+        totalTurns: playerOrder.length,
+        playerOrder,
         images: [],
         gamePhase: "IMAGE_GENERATION",
         isActive: true
@@ -213,33 +219,35 @@ export function setupSocket(server) {
 
         // Find next player
         const currentIndex = gameState.playerOrder.indexOf(username);
-        const nextIndex = (currentIndex + 1) % gameState.playerOrder.length;
-        
-        if (gameState.turn < gameState.totalTurns) {
-          // Move to next player
+        const nextIndex = currentIndex + 1;
+
+        // last player skips drawing and goes to final guess
+        if (nextIndex === gameState.totalTurns - 1) {
+          gameState.gamePhase = "FINAL_GUESS";
           gameState.currentPlayer = gameState.playerOrder[nextIndex];
-          gameState.turn++;
-          
-          // Update game state
+
           gameStates.set(roomId, gameState);
 
-          // Send updated game state to all players
           const users = await getRoomUsers(roomId);
           users.forEach(user => {
             const userSocket = io.sockets.sockets.get(user.socketId);
             if (userSocket) {
               sendGameStateToUser(userSocket, gameState, user.username);
             }
+          });
+
+          io.to(roomId).emit("phaseChange", {
+            phase: "FINAL_GUESS",
+            message: `${gameState.currentPlayer}, you're the last player — skip drawing and guess the secret word!`
           });
 
         } else {
-          // All players have generated images - last player (who just generated) makes final guess
-          gameState.gamePhase = "FINAL_GUESS";
-          gameState.currentPlayer = username; // The player who just generated the last image makes the guess
-          
+          // move to next player
+          gameState.currentPlayer = gameState.playerOrder[nextIndex];
+          gameState.turn++;
+
           gameStates.set(roomId, gameState);
-          
-          // Send updated game state to all players for final guess phase
+
           const users = await getRoomUsers(roomId);
           users.forEach(user => {
             const userSocket = io.sockets.sockets.get(user.socketId);
@@ -247,13 +255,7 @@ export function setupSocket(server) {
               sendGameStateToUser(userSocket, gameState, user.username);
             }
           });
-          
-          io.to(roomId).emit("phaseChange", { 
-            phase: "FINAL_GUESS", 
-            message: `${gameState.currentPlayer}, you just generated the last image. Now guess the secret word!` 
-          });
         }
-
       } catch (error) {
         console.error(`Image generation failed for ${username}:`, error);
         socket.emit("gameError", { 
@@ -415,7 +417,7 @@ function sendGameStateToUser(socket, gameState, username) {
   const isCurrentPlayer = gameState.currentPlayer === username;
   const isSpy = gameState.spyUsername === username;
   const isFirstTurn = gameState.turn === 1;
-  const isFirstPlayer = isFirstTurn && isCurrentPlayer; // 第一个玩家
+  const isFirstPlayer = isFirstTurn && isCurrentPlayer;
   const isFinalGuessPhase = gameState.gamePhase === "FINAL_GUESS";
   
   // Determine what the user should see
@@ -424,7 +426,7 @@ function sendGameStateToUser(socket, gameState, username) {
   let previousPlayer = null;
   let currentGameImage = null;
   let currentGamePlayer = null;
-  let showPreviousImage = false; // 明确标志是否显示前一张图片
+  let showPreviousImage = false;
   
   // Only show secret word to the first player if they're not a spy and it's their turn
   if (isFirstPlayer && !isSpy) {
@@ -467,8 +469,8 @@ function sendGameStateToUser(socket, gameState, username) {
     ...gameState,
     secretWord,
     isSpy,
-    isFirstPlayer, // 新增：标识是否为第一个玩家
-    showPreviousImage, // 新增：明确标志是否显示前一张图片
+    isFirstPlayer,
+    showPreviousImage,
     previousImage,
     previousPlayer,
     currentGameImage,
