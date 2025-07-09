@@ -529,10 +529,14 @@
                 <div v-if="image.player === user?.username" class="text-xs text-purple-600 font-medium">
                   (You)
                 </div>
+                <div v-if="image.turn === 1" class="text-xs text-green-600 font-medium">
+                  (First Player)
+                </div>
               </div>
               
               <!-- Vote Button -->
               <button
+                v-if="image.turn !== 1"
                 @click="selectVote(image.player)"
                 :disabled="isSubmittingVote || image.player === user?.username"
                 class="w-full py-2 px-4 rounded-lg font-medium transition-colors"
@@ -546,6 +550,11 @@
                 <span v-else-if="selectedVote === image.player">✓ Selected</span>
                 <span v-else>Vote for {{ image.player }}</span>
               </button>
+              
+              <!-- Comment for first player -->
+              <div v-else class="w-full py-2 px-4 bg-green-50 text-green-700 rounded-lg text-sm">
+                First player is never the spy
+              </div>
             </div>
           </div>
         </div>
@@ -557,9 +566,9 @@
             :disabled="!selectedVote || isSubmittingVote"
             class="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white py-3 px-8 rounded-lg font-medium text-lg transition-colors"
           >
-            <span v-if="isSubmittingVote">🗳️ Submitting vote...</span>
+            <span v-if="isSubmittingVote">Submitting vote...</span>
             <span v-else-if="!selectedVote">Select a player to vote</span>
-            <span v-else>🗳️ Submit Vote for {{ selectedVote }}</span>
+            <span v-else> Submit Vote for {{ selectedVote }}</span>
           </button>
           
           <!-- Vote Status -->
@@ -585,6 +594,63 @@
           <p class="text-red-700 text-sm font-medium">
             🕵️ You are the SPY! Try to avoid suspicion in the voting.
           </p>
+        </div>
+      </div>
+    </div>
+    <!-- Game Result Summary -->
+    <div v-if="gameResult" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 border-2 border-purple-200">
+        <div class="text-center space-y-6">
+          <!-- Winner Announcement -->
+          <div class="space-y-3">
+            <div class="text-6xl">
+              {{ getDisplayResult.emoji }}
+            </div>
+            <h2 class="text-3xl font-bold" 
+                :class="getDisplayResult.color">
+              {{ getDisplayResult.title }}
+            </h2>
+            <div class="h-1 w-20 mx-auto rounded-full"
+                 :class="getDisplayResult.barColor">
+            </div>
+          </div>
+
+          <!-- Game Details -->
+          <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600 font-medium">Secret Word:</span>
+              <span class="font-bold text-purple-700 text-lg">{{ gameResult.secretWord }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600 font-medium">The Spy:</span>
+              <span class="font-bold text-red-600">{{ gameResult.spy }}</span>
+            </div>
+            <div v-if="gameResult.finalGuess" class="flex justify-between items-center">
+              <span class="text-gray-600 font-medium">Final Guess:</span>
+              <span class="font-semibold text-gray-800">"{{ gameResult.finalGuess }}"</span>
+            </div>
+            <div v-if="gameResult.mostVoted" class="flex justify-between items-center">
+              <span class="text-gray-600 font-medium">Most Voted:</span>
+              <span class="font-semibold text-gray-800">{{ gameResult.mostVoted }}</span>
+            </div>
+          </div>
+
+          <!-- Result Message -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p class="text-blue-800 font-medium">
+              {{ getDisplayResult.message }}
+            </p>
+          </div>
+
+          <!-- Action Button -->
+          <div>
+            <button
+              @click="handleLeave"
+              class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+            >
+              🏠 Back to Home
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -642,6 +708,7 @@ const voteStatus = ref(null);
 const allImages = ref([]);
 const revealedSecretWord = ref("");
 const finalGuessResult = ref("");
+const gameResult = ref(null);
 
 // Input
 const prompt = ref("");
@@ -815,8 +882,8 @@ onMounted(async () => {
     // Listen for game end
     socket.on("gameEnd", (data) => {
       console.log("Game ended:", data);
-      // Handle game end - could show results modal or redirect
-      alert(`Game Over! ${data.result}: ${data.winner} wins! Secret word was: ${data.secretWord}`);
+      // Handle game end - show results
+      gameResult.value = data;
     });
 
     // Listen for users leaving the game
@@ -917,4 +984,76 @@ onUnmounted(() => {
     socket.disconnect();
   }
 });
-</script> 
+
+const getDisplayResult = computed(() => {
+  if (!gameResult.value) return {};
+  
+  const userIsSpy = gameResult.value.spy === user.value?.username;
+  
+  // Handle different game result scenarios
+  if (gameResult.value.result === 'GUESS_CORRECT') {
+    if (userIsSpy) {
+      return {
+        emoji: '😞',
+        title: 'You Lost!',
+        color: 'text-red-600',
+        barColor: 'bg-red-400',
+        message: '🎯 The secret word was guessed correctly. Your spy mission failed!'
+      };
+    } else {
+      return {
+        emoji: '🎉',
+        title: 'You Won!',
+        color: 'text-green-600',
+        barColor: 'bg-green-400',
+        message: '🎯 Correct guess! The spy mission was foiled!'
+      };
+    }
+  } else if (gameResult.value.result === 'SPY_FOUND') {
+    if (userIsSpy) {
+      return {
+        emoji: '😞',
+        title: 'You Lost!',
+        color: 'text-red-600',
+        barColor: 'bg-red-400',
+        message: '🕵️ You were caught in voting! Your spy mission failed!'
+      };
+    } else {
+      return {
+        emoji: '🎉',
+        title: 'You Won!',
+        color: 'text-green-600',
+        barColor: 'bg-green-400',
+        message: '🕵️ Spy was caught in voting!'
+      };
+    }
+  } else if (gameResult.value.result === 'SPY_NOT_FOUND' || gameResult.value.winner === 'SPY') {
+    if (userIsSpy) {
+      return {
+        emoji: '🎉',
+        title: 'You Won!',
+        color: 'text-green-600',
+        barColor: 'bg-green-400',
+        message: '😈 You avoided detection and completed your spy mission!'
+      };
+    } else {
+      return {
+        emoji: '😞',
+        title: 'You Lost!',
+        color: 'text-red-600',
+        barColor: 'bg-red-400',
+        message: '😈 The spy avoided detection and escaped!'
+      };
+    }
+  }
+  
+  // Default fallback
+  return {
+    emoji: '🎮',
+    title: 'Game Over!',
+    color: 'text-purple-600',
+    barColor: 'bg-purple-400',
+    message: 'Game completed!'
+  };
+});
+</script>

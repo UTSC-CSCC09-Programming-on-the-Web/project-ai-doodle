@@ -135,11 +135,8 @@ export function setupSocket(server) {
       const spyIndex = Math.floor(Math.random() * spyCandidates.length);
       const spyUsername = spyCandidates[spyIndex].username;
       
-      // Find first non-spy player to start
-      let firstPlayerIndex = 0;
-      if (users[firstPlayerIndex].username === spyUsername) {
-        firstPlayerIndex = (firstPlayerIndex + 1) % users.length;
-      }
+      // First player is always the first in the shuffled order (index 0)
+      const firstPlayerIndex = 0;
 
       const gameState = {
         roomId,
@@ -313,6 +310,14 @@ export function setupSocket(server) {
       const gameState = gameStates.get(roomId);
       if (!gameState || gameState.gamePhase !== "VOTING") {
         socket.emit("gameError", { message: "Not in voting phase" });
+        return;
+      }
+
+      const firstPlayer = gameState.playerOrder[0];
+      if (votedPlayer === firstPlayer) {
+        socket.emit("gameError", {
+          message: "The first player cannot be voted — they are not the spy."
+        });
         return;
       }
 
