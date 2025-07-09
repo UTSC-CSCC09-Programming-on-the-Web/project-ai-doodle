@@ -64,15 +64,15 @@
         Start Game
       </button>
 
-      <p v-if="gameStarted" class="mt-6 text-xl font-bold text-purple-600">
-        Game Started!
+      <p v-if="gameStarting" class="mt-6 text-xl font-bold text-purple-600">
+        Game starting, redirecting...
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { io } from "socket.io-client";
 import { getCurrentUser, getRoomById } from "../services/api-service";
@@ -87,7 +87,7 @@ const room = ref(null);
 const user = ref(null);
 const users = ref([]);
 const ready = ref(false);
-const gameStarted = ref(false);
+const gameStarting = ref(false);
 
 onMounted(async () => {
   try {
@@ -109,9 +109,17 @@ onMounted(async () => {
       }
     });
 
-    socket.on("gameStarted", () => {
-      gameStarted.value = true;
+    // Listen for game start event and redirect to game page
+    socket.on("gameStarted", (data) => {
+      gameStarting.value = true;
+      console.log("Game started, navigating to game page...");
+      
+      // Delay 1 second for user to see the notification
+      setTimeout(() => {
+        router.push(`/room/${roomId}/game`);
+      }, 1000);
     });
+
   } catch (err) {
     router.push("/login");
   }
@@ -141,4 +149,10 @@ function startGame() {
     socket.emit("startGame", roomId);
   }
 }
+
+onUnmounted(() => {
+  if (socket) {
+    socket.disconnect();
+  }
+});
 </script>

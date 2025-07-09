@@ -22,6 +22,6 @@ export const User = sequelize.define("User", {
   },
   isSubscribed: {
     type: DataTypes.BOOLEAN,
-    defaultValue: false,
+    defaultValue: true, // 修改默认值为true，绕过订阅检查
   },
 });

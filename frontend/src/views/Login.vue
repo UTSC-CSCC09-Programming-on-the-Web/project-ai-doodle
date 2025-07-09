@@ -5,20 +5,7 @@
     </h1>
 
     <div v-if="user">
-      <p class="mb-4">
-        Subscription: {{ user.isSubscribed ? "Active" : "Inactive" }}
-      </p>
-
       <button
-        v-if="!user.isSubscribed"
-        @click="goToSubscribe"
-        class="bg-purple-600 text-white px-4 py-2 rounded mb-2"
-      >
-        Subscribe Now
-      </button>
-
-      <button
-        v-if="user.isSubscribed"
         @click="goToHome"
         class="bg-green-600 text-white px-4 py-2 rounded mb-2"
       >
@@ -27,7 +14,7 @@
 
       <button
         @click="handleLogout"
-        class="bg-red-500 text-white px-4 py-2 rounded"
+        class="bg-red-500 text-white px-4 py-2 rounded ml-2"
       >
         Logout
       </button>
@@ -73,10 +60,6 @@ async function handleLogout() {
   } catch (err) {
     console.error("Logout failed:", err);
   }
-}
-
-function goToSubscribe() {
-  router.push("/subscribe");
 }
 
 function goToHome() {

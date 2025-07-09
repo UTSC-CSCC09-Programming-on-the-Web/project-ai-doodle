@@ -18,11 +18,8 @@ authRouter.get(
     session: true,
   }),
   (req, res) => {
-    if (req.user.isSubscribed) {
-      res.redirect(`${process.env.FRONTEND_URL}/home`);
-    } else {
-      res.redirect(`${process.env.FRONTEND_URL}/subscribe`);
-    }
+    // 直接跳转到主页，绕过订阅检查
+    res.redirect(`${process.env.FRONTEND_URL}/home`);
   },
 );
 
@@ -38,18 +35,21 @@ authRouter.get("/me", (req, res) => {
   }
 });
 
-authRouter.get("/logout", (req, res) => {
+authRouter.post("/logout", (req, res) => {
   req.logout((err) => {
     if (err) {
       return res.status(500).json({ error: "Logout failed" });
     }
-    req.session.destroy(() => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Session destroy failed" });
+      }
       res.clearCookie("connect.sid");
-      res.status(200).json({ message: "Logged out" });
+      res.json({ message: "Logged out successfully" });
     });
   });
 });
 
 authRouter.get("/failure", (req, res) => {
-  res.status(401).json({ error: "Google login failed" });
+  res.status(401).json({ error: "Authentication failed" });
 });
