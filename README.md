@@ -1,5 +1,9 @@
 # AI Doodle
 
+## Deployed URL (version 1.0)
+
+[https://aidoodle.online](https://aidoodle.online)
+
 ## Team Members
 
 - **Wengxin Xu**  
