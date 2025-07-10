@@ -44,7 +44,7 @@ passport.use(
             email,
             username,
             nickname: profile.displayName,
-            isSubscribed: true,
+            isSubscribed: false,
           });
         }
 

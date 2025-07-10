@@ -14,8 +14,12 @@ const router = useRouter();
 onMounted(async () => {
   try {
     const user = await getCurrentUser();
-    // 直接跳转到主页，绕过订阅检查
-    router.push("/home");
+
+    if (user.isSubscribed) {
+      router.push("/home");
+    } else {
+      router.push("/subscribe");
+    }
   } catch (err) {
     router.push("/login");
   }

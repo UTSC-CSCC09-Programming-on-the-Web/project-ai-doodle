@@ -18,8 +18,11 @@ authRouter.get(
     session: true,
   }),
   (req, res) => {
-    // 直接跳转到主页，绕过订阅检查
-    res.redirect(`${process.env.FRONTEND_URL}/home`);
+     if (req.user.isSubscribed) {
+      res.redirect(`${process.env.FRONTEND_URL}/home`);
+    } else {
+      res.redirect(`${process.env.FRONTEND_URL}/subscribe`);
+    }
   },
 );
 
@@ -35,17 +38,14 @@ authRouter.get("/me", (req, res) => {
   }
 });
 
-authRouter.post("/logout", (req, res) => {
+authRouter.get("/logout", (req, res) => {
   req.logout((err) => {
     if (err) {
       return res.status(500).json({ error: "Logout failed" });
     }
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ error: "Session destroy failed" });
-      }
+    req.session.destroy(() => {
       res.clearCookie("connect.sid");
-      res.json({ message: "Logged out successfully" });
+      res.status(200).json({ message: "Logged out" });
     });
   });
 });
