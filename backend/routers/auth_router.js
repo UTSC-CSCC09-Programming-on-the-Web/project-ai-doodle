@@ -18,7 +18,7 @@ authRouter.get(
     session: true,
   }),
   (req, res) => {
-     if (req.user.isSubscribed) {
+    if (req.user.isSubscribed) {
       res.redirect(`${process.env.FRONTEND_URL}/home`);
     } else {
       res.redirect(`${process.env.FRONTEND_URL}/subscribe`);

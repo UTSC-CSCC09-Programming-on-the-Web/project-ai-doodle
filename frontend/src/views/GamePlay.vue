@@ -14,17 +14,21 @@
     </div>
 
     <!-- Main Game Interface - Dynamic Layout based on game state -->
-    <div v-if="showPreviousImage && gamePhase === 'IMAGE_GENERATION'" class="grid grid-cols-3 gap-6 h-[600px]">
-      
+    <div
+      v-if="showPreviousImage && gamePhase === 'IMAGE_GENERATION'"
+      class="grid grid-cols-3 gap-6 h-[600px]"
+    >
       <!-- Left Column: Previous/Reference Image (Only show when not first player) -->
       <div class="bg-white rounded-lg shadow-lg p-4">
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
-          {{ isYourTurn ? 'Previous Image' : 'Current Game Progress' }}
+          {{ isYourTurn ? "Previous Image" : "Current Game Progress" }}
         </h2>
-        <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-          <img 
-            v-if="referenceImage" 
-            :src="referenceImage" 
+        <div
+          class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4"
+        >
+          <img
+            v-if="referenceImage"
+            :src="referenceImage"
             alt="Reference image"
             class="max-w-full max-h-full object-contain rounded-lg"
           />
@@ -44,12 +48,14 @@
       <!-- Middle Column: Current Player's Image -->
       <div class="bg-white rounded-lg shadow-lg p-4">
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
-          {{ isYourTurn ? 'Your Image' : `${currentPlayer}'s Turn` }}
+          {{ isYourTurn ? "Your Image" : `${currentPlayer}'s Turn` }}
         </h2>
-        <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-          <img 
-            v-if="currentImage" 
-            :src="currentImage" 
+        <div
+          class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4"
+        >
+          <img
+            v-if="currentImage"
+            :src="currentImage"
             alt="Your generated image"
             class="max-w-full max-h-full object-contain rounded-lg"
           />
@@ -59,27 +65,38 @@
               <span v-else-if="!isYourTurn">👀</span>
               <span v-else>⏳</span>
             </div>
-            <p v-if="isGenerating" class="text-blue-600 font-medium">{{ generatingMessage }}</p>
+            <p v-if="isGenerating" class="text-blue-600 font-medium">
+              {{ generatingMessage }}
+            </p>
             <p v-else-if="!isYourTurn">Watching {{ currentPlayer }}'s turn</p>
             <p v-else>Ready to generate image</p>
           </div>
         </div>
-        
+
         <!-- Prompt Input Area - Only show when it's user's turn -->
         <div v-if="isYourTurn" class="space-y-3">
-          <div v-if="showSecretWord && secretWord" class="bg-blue-50 p-3 rounded border">
+          <div
+            v-if="showSecretWord && secretWord"
+            class="bg-blue-50 p-3 rounded border"
+          >
             <p class="text-sm text-blue-800 font-medium">Secret Word:</p>
             <p class="text-lg font-bold text-blue-900">{{ secretWord }}</p>
-            <p class="text-xs text-blue-600 mt-1">Describe this word without using it directly!</p>
+            <p class="text-xs text-blue-600 mt-1">
+              Describe this word without using it directly!
+            </p>
           </div>
-          
+
           <textarea
             v-model="prompt"
             :disabled="isGenerating"
-            :placeholder="isFirstPlayer ? 'Describe the secret word with your prompt...' : 'Describe what you see in the previous image...'"
+            :placeholder="
+              isFirstPlayer
+                ? 'Describe the secret word with your prompt...'
+                : 'Describe what you see in the previous image...'
+            "
             class="w-full h-20 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100"
           ></textarea>
-          
+
           <button
             @click="generateImage"
             :disabled="!prompt.trim() || isGenerating"
@@ -88,19 +105,27 @@
             <span v-if="isGenerating">🎨 Generating with AI...</span>
             <span v-else>🚀 Generate Image with AI</span>
           </button>
-          
+
           <!-- Generation Status -->
-          <div v-if="generationStatus" class="text-sm text-center p-2 rounded" 
-               :class="generationStatus.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">
+          <div
+            v-if="generationStatus"
+            class="text-sm text-center p-2 rounded"
+            :class="
+              generationStatus.type === 'success'
+                ? 'bg-green-50 text-green-700'
+                : 'bg-red-50 text-red-700'
+            "
+          >
             {{ generationStatus.message }}
           </div>
         </div>
-        
+
         <!-- Waiting message for other players -->
         <div v-else class="space-y-3">
           <div class="bg-gray-50 p-4 rounded-lg text-center">
             <p class="text-gray-600 mb-2">
-              <span class="font-medium">{{ currentPlayer }}</span> is thinking...
+              <span class="font-medium">{{ currentPlayer }}</span> is
+              thinking...
             </p>
             <div class="text-xs text-gray-500">
               Wait for your turn to describe the image
@@ -114,12 +139,13 @@
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
           Game Status
         </h2>
-        
+
         <!-- Current Turn Info -->
         <div class="bg-green-50 p-4 rounded-lg mb-4">
           <h3 class="font-semibold text-green-800 mb-2">Current Turn</h3>
           <p class="text-sm text-gray-700">
-            <span class="font-medium">{{ currentPlayer }}</span> is generating an image
+            <span class="font-medium">{{ currentPlayer }}</span> is generating
+            an image
           </p>
           <div v-if="isYourTurn" class="mt-2 text-green-600 font-medium">
             🎯 It's your turn!
@@ -131,22 +157,38 @@
 
         <!-- Players List -->
         <div class="bg-blue-50 p-4 rounded-lg mb-4">
-          <h3 class="font-semibold text-blue-800 mb-2">Players ({{ users.length }})</h3>
+          <h3 class="font-semibold text-blue-800 mb-2">
+            Players ({{ users.length }})
+          </h3>
           <ul class="space-y-2">
-            <li v-for="(u, index) in orderedPlayers" :key="u.username" 
-                class="flex justify-between items-center text-sm">
+            <li
+              v-for="(u, index) in orderedPlayers"
+              :key="u.username"
+              class="flex justify-between items-center text-sm"
+            >
               <span class="flex items-center">
-                <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2">
+                <span
+                  class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2"
+                >
                   {{ index + 1 }}
                 </span>
                 {{ u.username }}
-                <span v-if="u.username === room?.creatorUsername" 
-                      class="ml-1 text-xs text-blue-600">(Host)</span>
-                <span v-if="u.username === user?.username" 
-                      class="ml-1 text-xs text-purple-600">(You)</span>
+                <span
+                  v-if="u.username === room?.creatorUsername"
+                  class="ml-1 text-xs text-blue-600"
+                  >(Host)</span
+                >
+                <span
+                  v-if="u.username === user?.username"
+                  class="ml-1 text-xs text-purple-600"
+                  >(You)</span
+                >
               </span>
-              <span v-if="u.username === currentPlayer" 
-                    class="text-green-600 text-xs">● Active</span>
+              <span
+                v-if="u.username === currentPlayer"
+                class="text-green-600 text-xs"
+                >● Active</span
+              >
             </li>
           </ul>
         </div>
@@ -155,7 +197,8 @@
         <div class="bg-purple-50 p-4 rounded-lg mb-4">
           <h3 class="font-semibold text-purple-800 mb-2">🤖 AI Assistant</h3>
           <p class="text-xs text-gray-600">
-            Using DALL-E 3 for image generation. Each image takes 10-30 seconds to create.
+            Using DALL-E 3 for image generation. Each image takes 10-30 seconds
+            to create.
           </p>
         </div>
 
@@ -163,7 +206,14 @@
         <div class="bg-yellow-50 p-4 rounded-lg">
           <h3 class="font-semibold text-yellow-800 mb-2">Rules</h3>
           <ul class="text-xs text-gray-600 space-y-1">
-            <li>• {{ isFirstPlayer ? 'Describe the secret word' : 'Describe what you see in the image' }}</li>
+            <li>
+              •
+              {{
+                isFirstPlayer
+                  ? "Describe the secret word"
+                  : "Describe what you see in the image"
+              }}
+            </li>
             <li>• Don't use the secret word directly</li>
             <li>• Be creative but clear</li>
             <li>• One spy among players</li>
@@ -176,7 +226,7 @@
             Progress: {{ currentTurn }}/{{ totalTurns }}
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               class="bg-purple-600 h-2 rounded-full transition-all duration-300"
               :style="{ width: `${(currentTurn / totalTurns) * 100}%` }"
             ></div>
@@ -184,31 +234,41 @@
         </div>
       </div>
     </div>
-    
+
     <!-- First Player Layout - Two Column Layout (Image Generation Phase) -->
-    <div v-else-if="gamePhase === 'IMAGE_GENERATION'" class="grid grid-cols-2 gap-6 h-[600px]">
-      
+    <div
+      v-else-if="gamePhase === 'IMAGE_GENERATION'"
+      class="grid grid-cols-2 gap-6 h-[600px]"
+    >
       <!-- Left Column: Current Player's Image (Wider for first player) -->
       <div class="bg-white rounded-lg shadow-lg p-4">
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
-          {{ isYourTurn ? 'Your Image' : `${currentPlayer}'s Turn` }}
+          {{ isYourTurn ? "Your Image" : `${currentPlayer}'s Turn` }}
         </h2>
-        
+
         <!-- First Player Special Notice -->
-        <div v-if="isFirstPlayer" class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
+        <div
+          v-if="isFirstPlayer"
+          class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4"
+        >
           <div class="flex items-center mb-2">
             <span class="text-2xl mr-2">🎯</span>
-            <h3 class="font-semibold text-blue-800">You're the First Player!</h3>
+            <h3 class="font-semibold text-blue-800">
+              You're the First Player!
+            </h3>
           </div>
           <p class="text-sm text-blue-700">
-            Create the first image based on the secret word. Other players will continue the chain from your image.
+            Create the first image based on the secret word. Other players will
+            continue the chain from your image.
           </p>
         </div>
-        
-        <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-          <img 
-            v-if="currentImage" 
-            :src="currentImage" 
+
+        <div
+          class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4"
+        >
+          <img
+            v-if="currentImage"
+            :src="currentImage"
             alt="Your generated image"
             class="max-w-full max-h-full object-contain rounded-lg"
           />
@@ -218,28 +278,41 @@
               <span v-else-if="!isYourTurn">👀</span>
               <span v-else>⭐</span>
             </div>
-            <p v-if="isGenerating" class="text-blue-600 font-medium">{{ generatingMessage }}</p>
+            <p v-if="isGenerating" class="text-blue-600 font-medium">
+              {{ generatingMessage }}
+            </p>
             <p v-else-if="!isYourTurn">Watching {{ currentPlayer }}'s turn</p>
-            <p v-else-if="isFirstPlayer" class="text-purple-600 font-medium">Ready to create the first image!</p>
+            <p v-else-if="isFirstPlayer" class="text-purple-600 font-medium">
+              Ready to create the first image!
+            </p>
             <p v-else>Ready to generate image</p>
           </div>
         </div>
-        
+
         <!-- Prompt Input Area - Only show when it's user's turn -->
         <div v-if="isYourTurn" class="space-y-3">
-          <div v-if="showSecretWord && secretWord" class="bg-blue-50 p-3 rounded border">
+          <div
+            v-if="showSecretWord && secretWord"
+            class="bg-blue-50 p-3 rounded border"
+          >
             <p class="text-sm text-blue-800 font-medium">Secret Word:</p>
             <p class="text-lg font-bold text-blue-900">{{ secretWord }}</p>
-            <p class="text-xs text-blue-600 mt-1">Describe this word without using it directly!</p>
+            <p class="text-xs text-blue-600 mt-1">
+              Describe this word without using it directly!
+            </p>
           </div>
-          
+
           <textarea
             v-model="prompt"
             :disabled="isGenerating"
-            :placeholder="isFirstPlayer ? 'Describe the secret word with your prompt...' : 'Describe what you see in the previous image...'"
+            :placeholder="
+              isFirstPlayer
+                ? 'Describe the secret word with your prompt...'
+                : 'Describe what you see in the previous image...'
+            "
             class="w-full h-20 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100"
           ></textarea>
-          
+
           <button
             @click="generateImage"
             :disabled="!prompt.trim() || isGenerating"
@@ -248,19 +321,27 @@
             <span v-if="isGenerating">🎨 Generating with AI...</span>
             <span v-else>🚀 Generate Image with AI</span>
           </button>
-          
+
           <!-- Generation Status -->
-          <div v-if="generationStatus" class="text-sm text-center p-2 rounded" 
-               :class="generationStatus.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">
+          <div
+            v-if="generationStatus"
+            class="text-sm text-center p-2 rounded"
+            :class="
+              generationStatus.type === 'success'
+                ? 'bg-green-50 text-green-700'
+                : 'bg-red-50 text-red-700'
+            "
+          >
             {{ generationStatus.message }}
           </div>
         </div>
-        
+
         <!-- Waiting message for other players -->
         <div v-else class="space-y-3">
           <div class="bg-gray-50 p-4 rounded-lg text-center">
             <p class="text-gray-600 mb-2">
-              <span class="font-medium">{{ currentPlayer }}</span> is thinking...
+              <span class="font-medium">{{ currentPlayer }}</span> is
+              thinking...
             </p>
             <div class="text-xs text-gray-500">
               Wait for your turn to describe the image
@@ -274,12 +355,13 @@
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
           Game Status
         </h2>
-        
+
         <!-- Current Turn Info -->
         <div class="bg-green-50 p-4 rounded-lg mb-4">
           <h3 class="font-semibold text-green-800 mb-2">Current Turn</h3>
           <p class="text-sm text-gray-700">
-            <span class="font-medium">{{ currentPlayer }}</span> is generating an image
+            <span class="font-medium">{{ currentPlayer }}</span> is generating
+            an image
           </p>
           <div v-if="isYourTurn" class="mt-2 text-green-600 font-medium">
             🎯 It's your turn!
@@ -291,22 +373,38 @@
 
         <!-- Players List -->
         <div class="bg-blue-50 p-4 rounded-lg mb-4">
-          <h3 class="font-semibold text-blue-800 mb-2">Players ({{ users.length }})</h3>
+          <h3 class="font-semibold text-blue-800 mb-2">
+            Players ({{ users.length }})
+          </h3>
           <ul class="space-y-2">
-            <li v-for="(u, index) in orderedPlayers" :key="u.username" 
-                class="flex justify-between items-center text-sm">
+            <li
+              v-for="(u, index) in orderedPlayers"
+              :key="u.username"
+              class="flex justify-between items-center text-sm"
+            >
               <span class="flex items-center">
-                <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2">
+                <span
+                  class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2"
+                >
                   {{ index + 1 }}
                 </span>
                 {{ u.username }}
-                <span v-if="u.username === room?.creatorUsername" 
-                      class="ml-1 text-xs text-blue-600">(Host)</span>
-                <span v-if="u.username === user?.username" 
-                      class="ml-1 text-xs text-purple-600">(You)</span>
+                <span
+                  v-if="u.username === room?.creatorUsername"
+                  class="ml-1 text-xs text-blue-600"
+                  >(Host)</span
+                >
+                <span
+                  v-if="u.username === user?.username"
+                  class="ml-1 text-xs text-purple-600"
+                  >(You)</span
+                >
               </span>
-              <span v-if="u.username === currentPlayer" 
-                    class="text-green-600 text-xs">● Active</span>
+              <span
+                v-if="u.username === currentPlayer"
+                class="text-green-600 text-xs"
+                >● Active</span
+              >
             </li>
           </ul>
         </div>
@@ -315,7 +413,8 @@
         <div class="bg-purple-50 p-4 rounded-lg mb-4">
           <h3 class="font-semibold text-purple-800 mb-2">🤖 AI Assistant</h3>
           <p class="text-xs text-gray-600">
-            Using DALL-E 3 for image generation. Each image takes 10-30 seconds to create.
+            Using DALL-E 3 for image generation. Each image takes 10-30 seconds
+            to create.
           </p>
         </div>
 
@@ -323,7 +422,14 @@
         <div class="bg-yellow-50 p-4 rounded-lg">
           <h3 class="font-semibold text-yellow-800 mb-2">Rules</h3>
           <ul class="text-xs text-gray-600 space-y-1">
-            <li>• {{ isFirstPlayer ? 'Describe the secret word' : 'Describe what you see in the image' }}</li>
+            <li>
+              •
+              {{
+                isFirstPlayer
+                  ? "Describe the secret word"
+                  : "Describe what you see in the image"
+              }}
+            </li>
             <li>• Don't use the secret word directly</li>
             <li>• Be creative but clear</li>
             <li>• One spy among players</li>
@@ -336,7 +442,7 @@
             Progress: {{ currentTurn }}/{{ totalTurns }}
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               class="bg-purple-600 h-2 rounded-full transition-all duration-300"
               :style="{ width: `${(currentTurn / totalTurns) * 100}%` }"
             ></div>
@@ -346,33 +452,44 @@
     </div>
 
     <!-- Final Guess Phase Layout -->
-    <div v-else-if="gamePhase === 'FINAL_GUESS'" class="grid grid-cols-2 gap-6 h-[600px]">
-      
+    <div
+      v-else-if="gamePhase === 'FINAL_GUESS'"
+      class="grid grid-cols-2 gap-6 h-[600px]"
+    >
       <!-- Left Column: Final Image & Guess Input -->
       <div class="bg-white rounded-lg shadow-lg p-4">
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
           🎯 Final Guess Phase
         </h2>
-        
+
         <!-- Final Guess Notice -->
         <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg mb-4">
           <div class="flex items-center mb-2">
             <span class="text-2xl mr-2">🔍</span>
-            <h3 class="font-semibold text-orange-800">Time to Guess the Secret Word!</h3>
+            <h3 class="font-semibold text-orange-800">
+              Time to Guess the Secret Word!
+            </h3>
           </div>
           <p class="text-sm text-orange-700 mb-2">
-            {{ isYourTurn ? 'Look at the final image and guess the original secret word.' : `${currentPlayer} is making the final guess.` }}
+            {{
+              isYourTurn
+                ? "Look at the final image and guess the original secret word."
+                : `${currentPlayer} is making the final guess.`
+            }}
           </p>
           <div v-if="!isYourTurn" class="text-xs text-orange-600">
-            If they guess correctly, all non-spy players win. If wrong, everyone votes for the spy.
+            If they guess correctly, all non-spy players win. If wrong, everyone
+            votes for the spy.
           </div>
         </div>
 
         <!-- Show final image -->
-        <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-          <img 
-            v-if="referenceImage" 
-            :src="referenceImage" 
+        <div
+          class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4"
+        >
+          <img
+            v-if="referenceImage"
+            :src="referenceImage"
             alt="Final image for guessing"
             class="max-w-full max-h-full object-contain rounded-lg"
           />
@@ -381,7 +498,7 @@
             <p>Final image will appear here</p>
           </div>
         </div>
-        
+
         <!-- Final Guess Input - Only show when it's user's turn -->
         <div v-if="isYourTurn" class="space-y-3">
           <textarea
@@ -390,7 +507,7 @@
             placeholder="What do you think the original secret word was?"
             class="w-full h-20 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-gray-100"
           ></textarea>
-          
+
           <button
             @click="submitFinalGuess"
             :disabled="!finalGuess.trim() || isSubmittingGuess"
@@ -399,23 +516,29 @@
             <span v-if="isSubmittingGuess">🤔 Submitting guess...</span>
             <span v-else>🎯 Submit Final Guess</span>
           </button>
-          
+
           <!-- Guess Status -->
-          <div v-if="guessStatus" class="text-sm text-center p-2 rounded" 
-               :class="guessStatus.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">
+          <div
+            v-if="guessStatus"
+            class="text-sm text-center p-2 rounded"
+            :class="
+              guessStatus.type === 'success'
+                ? 'bg-green-50 text-green-700'
+                : 'bg-red-50 text-red-700'
+            "
+          >
             {{ guessStatus.message }}
           </div>
         </div>
-        
+
         <!-- Waiting message for other players -->
         <div v-else class="space-y-3">
           <div class="bg-gray-50 p-4 rounded-lg text-center">
             <p class="text-gray-600 mb-2">
-              <span class="font-medium">{{ currentPlayer }}</span> is making the final guess...
+              <span class="font-medium">{{ currentPlayer }}</span> is making the
+              final guess...
             </p>
-            <div class="text-xs text-gray-500">
-              Wait for their decision
-            </div>
+            <div class="text-xs text-gray-500">Wait for their decision</div>
           </div>
         </div>
       </div>
@@ -425,12 +548,13 @@
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
           Game Status
         </h2>
-        
+
         <!-- Final Phase Info -->
         <div class="bg-orange-50 p-4 rounded-lg mb-4">
           <h3 class="font-semibold text-orange-800 mb-2">Final Phase</h3>
           <p class="text-sm text-gray-700">
-            <span class="font-medium">{{ currentPlayer }}</span> must guess the secret word
+            <span class="font-medium">{{ currentPlayer }}</span> must guess the
+            secret word
           </p>
           <div v-if="isYourTurn" class="mt-2 text-orange-600 font-medium">
             🎯 Make your guess!
@@ -442,22 +566,38 @@
 
         <!-- Players List -->
         <div class="bg-blue-50 p-4 rounded-lg mb-4">
-          <h3 class="font-semibold text-blue-800 mb-2">Players ({{ users.length }})</h3>
+          <h3 class="font-semibold text-blue-800 mb-2">
+            Players ({{ users.length }})
+          </h3>
           <ul class="space-y-2">
-            <li v-for="(u, index) in orderedPlayers" :key="u.username" 
-                class="flex justify-between items-center text-sm">
+            <li
+              v-for="(u, index) in orderedPlayers"
+              :key="u.username"
+              class="flex justify-between items-center text-sm"
+            >
               <span class="flex items-center">
-                <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2">
+                <span
+                  class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mr-2"
+                >
                   {{ index + 1 }}
                 </span>
                 {{ u.username }}
-                <span v-if="u.username === room?.creatorUsername" 
-                      class="ml-1 text-xs text-blue-600">(Host)</span>
-                <span v-if="u.username === user?.username" 
-                      class="ml-1 text-xs text-purple-600">(You)</span>
+                <span
+                  v-if="u.username === room?.creatorUsername"
+                  class="ml-1 text-xs text-blue-600"
+                  >(Host)</span
+                >
+                <span
+                  v-if="u.username === user?.username"
+                  class="ml-1 text-xs text-purple-600"
+                  >(You)</span
+                >
               </span>
-              <span v-if="u.username === currentPlayer" 
-                    class="text-orange-600 text-xs">🎯 Guessing</span>
+              <span
+                v-if="u.username === currentPlayer"
+                class="text-orange-600 text-xs"
+                >🎯 Guessing</span
+              >
             </li>
           </ul>
         </div>
@@ -477,7 +617,6 @@
 
     <!-- Voting Phase Layout -->
     <div v-else-if="gamePhase === 'VOTING'" class="space-y-6">
-      
       <!-- Header Info -->
       <div class="bg-red-50 border border-red-200 p-6 rounded-lg">
         <div class="flex items-center mb-4">
@@ -485,10 +624,16 @@
           <h2 class="text-2xl font-bold text-red-800">Voting Phase</h2>
         </div>
         <div class="text-red-700 space-y-2">
-          <p class="text-lg">The guess was incorrect! Now vote for who you think is the spy.</p>
+          <p class="text-lg">
+            The guess was incorrect! Now vote for who you think is the spy.
+          </p>
           <div class="bg-red-100 p-3 rounded border">
-            <p class="text-sm"><strong>Secret Word:</strong> {{ revealedSecretWord }}</p>
-            <p class="text-sm"><strong>Final Guess:</strong> "{{ finalGuessResult }}"</p>
+            <p class="text-sm">
+              <strong>Secret Word:</strong> {{ revealedSecretWord }}
+            </p>
+            <p class="text-sm">
+              <strong>Final Guess:</strong> "{{ finalGuessResult }}"
+            </p>
           </div>
         </div>
       </div>
@@ -498,20 +643,25 @@
         <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">
           🖼️ All Generated Images - Vote for the Spy!
         </h3>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="(image, index) in allImages" :key="index" 
-               class="bg-gray-50 rounded-lg p-4 border-2 transition-all duration-200"
-               :class="{
-                 'border-blue-500 bg-blue-50': selectedVote === image.player,
-                 'border-gray-200 hover:border-gray-300': selectedVote !== image.player
-               }">
-            
+          <div
+            v-for="(image, index) in allImages"
+            :key="index"
+            class="bg-gray-50 rounded-lg p-4 border-2 transition-all duration-200"
+            :class="{
+              'border-blue-500 bg-blue-50': selectedVote === image.player,
+              'border-gray-200 hover:border-gray-300':
+                selectedVote !== image.player,
+            }"
+          >
             <!-- Image Display -->
-            <div class="h-48 bg-gray-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-              <img 
-                v-if="image.imageUrl" 
-                :src="image.imageUrl" 
+            <div
+              class="h-48 bg-gray-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden"
+            >
+              <img
+                v-if="image.imageUrl"
+                :src="image.imageUrl"
                 :alt="`Image by ${image.player}`"
                 class="max-w-full max-h-full object-contain rounded-lg"
               />
@@ -520,20 +670,26 @@
                 <p class="text-sm">Image not available</p>
               </div>
             </div>
-            
+
             <!-- Player Info and Vote Button -->
             <div class="text-center space-y-3">
               <div class="space-y-1">
                 <h4 class="font-semibold text-gray-800">{{ image.player }}</h4>
                 <p class="text-xs text-gray-600">Turn {{ image.turn }}</p>
-                <div v-if="image.player === user?.username" class="text-xs text-purple-600 font-medium">
+                <div
+                  v-if="image.player === user?.username"
+                  class="text-xs text-purple-600 font-medium"
+                >
                   (You)
                 </div>
-                <div v-if="image.turn === 1" class="text-xs text-green-600 font-medium">
+                <div
+                  v-if="image.turn === 1"
+                  class="text-xs text-green-600 font-medium"
+                >
                   (First Player)
                 </div>
               </div>
-              
+
               <!-- Vote Button -->
               <button
                 v-if="image.turn !== 1"
@@ -542,23 +698,33 @@
                 class="w-full py-2 px-4 rounded-lg font-medium transition-colors"
                 :class="{
                   'bg-blue-600 text-white': selectedVote === image.player,
-                  'bg-gray-200 text-gray-500 cursor-not-allowed': image.player === user?.username,
-                  'bg-gray-100 hover:bg-gray-200 text-gray-700': selectedVote !== image.player && image.player !== user?.username
+                  'bg-gray-200 text-gray-500 cursor-not-allowed':
+                    image.player === user?.username,
+                  'bg-gray-100 hover:bg-gray-200 text-gray-700':
+                    selectedVote !== image.player &&
+                    image.player !== user?.username,
                 }"
               >
-                <span v-if="image.player === user?.username">Can't vote for yourself</span>
-                <span v-else-if="selectedVote === image.player">✓ Selected</span>
+                <span v-if="image.player === user?.username"
+                  >Can't vote for yourself</span
+                >
+                <span v-else-if="selectedVote === image.player"
+                  >✓ Selected</span
+                >
                 <span v-else>Vote for {{ image.player }}</span>
               </button>
-              
+
               <!-- Comment for first player -->
-              <div v-else class="w-full py-2 px-4 bg-green-50 text-green-700 rounded-lg text-sm">
+              <div
+                v-else
+                class="w-full py-2 px-4 bg-green-50 text-green-700 rounded-lg text-sm"
+              >
                 First player is never the spy
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- Submit Vote Button -->
         <div class="mt-8 text-center">
           <button
@@ -570,10 +736,17 @@
             <span v-else-if="!selectedVote">Select a player to vote</span>
             <span v-else> Submit Vote for {{ selectedVote }}</span>
           </button>
-          
+
           <!-- Vote Status -->
-          <div v-if="voteStatus" class="mt-4 text-sm p-2 rounded" 
-               :class="voteStatus.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">
+          <div
+            v-if="voteStatus"
+            class="mt-4 text-sm p-2 rounded"
+            :class="
+              voteStatus.type === 'success'
+                ? 'bg-green-50 text-green-700'
+                : 'bg-red-50 text-red-700'
+            "
+          >
             {{ voteStatus.message }}
           </div>
         </div>
@@ -589,8 +762,11 @@
           <li>• If the spy is not found: Spy wins</li>
           <li>• You cannot vote for yourself</li>
         </ul>
-        
-        <div v-if="isSpy" class="mt-4 bg-red-50 border border-red-200 p-3 rounded">
+
+        <div
+          v-if="isSpy"
+          class="mt-4 bg-red-50 border border-red-200 p-3 rounded"
+        >
           <p class="text-red-700 text-sm font-medium">
             🕵️ You are the SPY! Try to avoid suspicion in the voting.
           </p>
@@ -598,44 +774,66 @@
       </div>
     </div>
     <!-- Game Result Summary -->
-    <div v-if="gameResult" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 border-2 border-purple-200">
+    <div
+      v-if="gameResult"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 border-2 border-purple-200"
+      >
         <div class="text-center space-y-6">
           <!-- Winner Announcement -->
           <div class="space-y-3">
             <div class="text-6xl">
               {{ getDisplayResult.emoji }}
             </div>
-            <h2 class="text-3xl font-bold" 
-                :class="getDisplayResult.color">
+            <h2 class="text-3xl font-bold" :class="getDisplayResult.color">
               {{ getDisplayResult.title }}
             </h2>
-            <div class="h-1 w-20 mx-auto rounded-full"
-                 :class="getDisplayResult.barColor">
-            </div>
+            <div
+              class="h-1 w-20 mx-auto rounded-full"
+              :class="getDisplayResult.barColor"
+            ></div>
           </div>
 
           <!-- Game Details -->
           <div class="bg-gray-50 rounded-lg p-4 space-y-3">
             <div class="flex justify-between items-center">
               <span class="text-gray-600 font-medium">Secret Word:</span>
-              <span class="font-bold text-purple-700 text-lg">{{ gameResult.secretWord }}</span>
+              <span class="font-bold text-purple-700 text-lg">{{
+                gameResult.secretWord
+              }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-gray-600 font-medium">The Spy:</span>
               <span class="font-bold text-red-600">{{ gameResult.spy }}</span>
             </div>
-            <div v-if="gameResult.finalGuess" class="flex justify-between items-center">
+            <div
+              v-if="gameResult.finalGuess"
+              class="flex justify-between items-center"
+            >
               <span class="text-gray-600 font-medium">Final Guess:</span>
-              <span class="font-semibold text-gray-800">"{{ gameResult.finalGuess }}"</span>
+              <span class="font-semibold text-gray-800"
+                >"{{ gameResult.finalGuess }}"</span
+              >
             </div>
-            <div v-if="gameResult.mostVoted" class="flex justify-between items-center">
+            <div
+              v-if="gameResult.mostVoted"
+              class="flex justify-between items-center"
+            >
               <span class="text-gray-600 font-medium">Most Voted:</span>
-              <span class="font-semibold text-gray-800">{{ gameResult.mostVoted }}</span>
+              <span class="font-semibold text-gray-800">{{
+                gameResult.mostVoted
+              }}</span>
             </div>
-            <div v-if="gameResult.tiedPlayers && gameResult.tiedPlayers.length > 1" class="flex justify-between items-center">
+            <div
+              v-if="gameResult.tiedPlayers && gameResult.tiedPlayers.length > 1"
+              class="flex justify-between items-center"
+            >
               <span class="text-gray-600 font-medium">Tied Players:</span>
-              <span class="font-semibold text-gray-800">{{ gameResult.tiedPlayers.join(', ') }}</span>
+              <span class="font-semibold text-gray-800">{{
+                gameResult.tiedPlayers.join(", ")
+              }}</span>
             </div>
           </div>
 
@@ -724,7 +922,7 @@ const orderedPlayers = computed(() => {
   }
 
   return playerOrder.value
-    .map(name => users.value.find(u => u.username === name))
+    .map((name) => users.value.find((u) => u.username === name))
     .filter(Boolean);
 });
 
@@ -768,7 +966,7 @@ onMounted(async () => {
     // Listen for game updates
     socket.on("gameUpdate", (gameState) => {
       console.log("Received game update:", gameState);
-      
+
       currentPlayer.value = gameState.currentPlayer;
       currentTurn.value = gameState.turn;
       totalTurns.value = gameState.totalTurns;
@@ -779,29 +977,31 @@ onMounted(async () => {
       isFirstPlayer.value = gameState.isFirstPlayer || false;
       showPreviousImage.value = gameState.showPreviousImage !== false; // Default to true if not specified
       playerOrder.value = gameState.playerOrder || [];
-      
+
       // Show secret word only if provided by server
       showSecretWord.value = !!gameState.secretWord;
-      
+
       // Update images based on new logic
       if (gameState.previousImage) {
         previousImage.value = gameState.previousImage;
         previousPlayer.value = gameState.previousPlayer;
       }
-      
+
       if (gameState.currentGameImage) {
         currentGameImage.value = gameState.currentGameImage;
         currentGamePlayer.value = gameState.currentGamePlayer;
       }
-      
-      console.log(`Game state updated - Phase: ${gamePhase.value}, Turn: ${currentTurn.value}, Current: ${currentPlayer.value}, Your turn: ${isYourTurn.value}, FirstPlayer: ${isFirstPlayer.value}, ShowPrevious: ${showPreviousImage.value}, Secret: ${secretWord.value ? 'YES' : 'NO'}, Spy: ${isSpy.value}`);
+
+      console.log(
+        `Game state updated - Phase: ${gamePhase.value}, Turn: ${currentTurn.value}, Current: ${currentPlayer.value}, Your turn: ${isYourTurn.value}, FirstPlayer: ${isFirstPlayer.value}, ShowPrevious: ${showPreviousImage.value}, Secret: ${secretWord.value ? "YES" : "NO"}, Spy: ${isSpy.value}`,
+      );
     });
 
     // Listen for phase changes
     socket.on("phaseChange", (data) => {
       console.log("Phase change:", data);
       gamePhase.value = data.phase;
-      
+
       if (data.phase === "FINAL_GUESS") {
         // Clear any previous states
         isGenerating.value = false;
@@ -809,24 +1009,26 @@ onMounted(async () => {
       } else if (data.phase === "VOTING") {
         // Set up voting phase data
         console.log("Entering voting phase with data:", data);
-        
+
         // Clear any previous states
         isGenerating.value = false;
         isSubmittingGuess.value = false;
         generationStatus.value = null;
         guessStatus.value = null;
-        
+
         // Set voting data
         allImages.value = data.images || [];
         revealedSecretWord.value = data.secretWord || "";
         finalGuessResult.value = data.finalGuess || "";
-        
+
         // Reset voting state
         selectedVote.value = "";
         isSubmittingVote.value = false;
         voteStatus.value = null;
-        
-        console.log(`Voting phase setup - Images: ${allImages.value.length}, Secret: ${revealedSecretWord.value}, Guess: ${finalGuessResult.value}`);
+
+        console.log(
+          `Voting phase setup - Images: ${allImages.value.length}, Secret: ${revealedSecretWord.value}, Guess: ${finalGuessResult.value}`,
+        );
       }
     });
 
@@ -847,10 +1049,10 @@ onMounted(async () => {
         isGenerating.value = false;
         prompt.value = ""; // Clear prompt after successful generation
         generationStatus.value = {
-          type: 'success',
-          message: data.message || 'Image generated successfully!'
+          type: "success",
+          message: data.message || "Image generated successfully!",
         };
-        
+
         // Clear status after 3 seconds
         setTimeout(() => {
           generationStatus.value = null;
@@ -863,19 +1065,19 @@ onMounted(async () => {
       console.error("Game error:", error.message);
       isGenerating.value = false;
       isSubmittingGuess.value = false;
-      
+
       if (gamePhase.value === "FINAL_GUESS") {
         guessStatus.value = {
-          type: 'error',
-          message: error.message
+          type: "error",
+          message: error.message,
         };
         setTimeout(() => {
           guessStatus.value = null;
         }, 5000);
       } else {
         generationStatus.value = {
-          type: 'error',
-          message: error.message
+          type: "error",
+          message: error.message,
         };
         setTimeout(() => {
           generationStatus.value = null;
@@ -894,7 +1096,6 @@ onMounted(async () => {
     socket.on("userLeftGame", (data) => {
       console.log(`${data.username} left the game`);
     });
-
   } catch (err) {
     console.error("Failed to load game:", err);
     router.push("/login");
@@ -902,36 +1103,48 @@ onMounted(async () => {
 });
 
 const generateImage = async () => {
-  if (!prompt.value.trim() || isGenerating.value || !isYourTurn.value || gamePhase.value !== "IMAGE_GENERATION") return;
-  
+  if (
+    !prompt.value.trim() ||
+    isGenerating.value ||
+    !isYourTurn.value ||
+    gamePhase.value !== "IMAGE_GENERATION"
+  )
+    return;
+
   console.log(`Generating image with prompt: "${prompt.value}"`);
   isGenerating.value = true;
   generatingMessage.value = "Connecting to AI service...";
   generationStatus.value = null;
-  
+
   // Emit to server for image generation
   socket.emit("generateImage", {
     roomId,
     username: user.value.username,
     prompt: prompt.value.trim(),
-    turn: currentTurn.value
+    turn: currentTurn.value,
   });
 };
 
 const submitFinalGuess = async () => {
-  if (!finalGuess.value.trim() || isSubmittingGuess.value || !isYourTurn.value || gamePhase.value !== "FINAL_GUESS") return;
-  
+  if (
+    !finalGuess.value.trim() ||
+    isSubmittingGuess.value ||
+    !isYourTurn.value ||
+    gamePhase.value !== "FINAL_GUESS"
+  )
+    return;
+
   console.log(`Submitting final guess: "${finalGuess.value}"`);
   isSubmittingGuess.value = true;
   guessStatus.value = null;
-  
+
   // Emit to server for final guess
   socket.emit("finalGuess", {
     roomId,
     username: user.value.username,
-    guess: finalGuess.value.trim()
+    guess: finalGuess.value.trim(),
   });
-  
+
   // Reset state
   setTimeout(() => {
     isSubmittingGuess.value = false;
@@ -947,8 +1160,15 @@ const selectVote = (playerName) => {
 };
 
 const submitVote = async () => {
-  if (!selectedVote.value || isSubmittingVote.value || gamePhase.value !== "VOTING") {
-    voteStatus.value = { type: "error", message: "Please select a player to vote for!" };
+  if (
+    !selectedVote.value ||
+    isSubmittingVote.value ||
+    gamePhase.value !== "VOTING"
+  ) {
+    voteStatus.value = {
+      type: "error",
+      message: "Please select a player to vote for!",
+    };
     return;
   }
 
@@ -960,14 +1180,14 @@ const submitVote = async () => {
   socket.emit("vote", {
     roomId,
     username: user.value?.username,
-    votedPlayer: selectedVote.value
+    votedPlayer: selectedVote.value,
   });
 
-  voteStatus.value = { 
-    type: "success", 
-    message: `Vote submitted for ${selectedVote.value}! Waiting for other players...` 
+  voteStatus.value = {
+    type: "success",
+    message: `Vote submitted for ${selectedVote.value}! Waiting for other players...`,
   };
-  
+
   // Keep submit button disabled after voting
   setTimeout(() => {
     // Don't reset isSubmittingVote to keep button disabled
@@ -991,99 +1211,104 @@ onUnmounted(() => {
 
 const getDisplayResult = computed(() => {
   if (!gameResult.value) return {};
-  
+
   const userIsSpy = gameResult.value.spy === user.value?.username;
-  
+
   // Handle different game result scenarios
-  if (gameResult.value.result === 'GUESS_CORRECT') {
+  if (gameResult.value.result === "GUESS_CORRECT") {
     if (userIsSpy) {
       return {
-        emoji: '😞',
-        title: 'You Lost!',
-        color: 'text-red-600',
-        barColor: 'bg-red-400',
-        message: '🎯 The secret word was guessed correctly. Your spy mission failed!'
+        emoji: "😞",
+        title: "You Lost!",
+        color: "text-red-600",
+        barColor: "bg-red-400",
+        message:
+          "🎯 The secret word was guessed correctly. Your spy mission failed!",
       };
     } else {
       return {
-        emoji: '🎉',
-        title: 'You Won!',
-        color: 'text-green-600',
-        barColor: 'bg-green-400',
-        message: '🎯 Correct guess! The spy mission was foiled!'
+        emoji: "🎉",
+        title: "You Won!",
+        color: "text-green-600",
+        barColor: "bg-green-400",
+        message: "🎯 Correct guess! The spy mission was foiled!",
       };
     }
-  } else if (gameResult.value.result === 'SPY_FOUND') {
+  } else if (gameResult.value.result === "SPY_FOUND") {
     if (userIsSpy) {
       return {
-        emoji: '😞',
-        title: 'You Lost!',
-        color: 'text-red-600',
-        barColor: 'bg-red-400',
-        message: '🕵️ You were caught in voting! Your spy mission failed!'
+        emoji: "😞",
+        title: "You Lost!",
+        color: "text-red-600",
+        barColor: "bg-red-400",
+        message: "🕵️ You were caught in voting! Your spy mission failed!",
       };
     } else {
       return {
-        emoji: '🎉',
-        title: 'You Won!',
-        color: 'text-green-600',
-        barColor: 'bg-green-400',
-        message: '🕵️ Spy was caught in voting!'
+        emoji: "🎉",
+        title: "You Won!",
+        color: "text-green-600",
+        barColor: "bg-green-400",
+        message: "🕵️ Spy was caught in voting!",
       };
     }
-  } else if (gameResult.value.result === 'TIE_NO_WINNER') {
-      return {
-        emoji: '😐',
-        title: 'Everyone Tied!',
-        color: 'text-gray-700',
-        barColor: 'bg-gray-400',
-        message: '🤝 It was a tie and the spy was among them — no winner this round!'
-      };
-  } else if (gameResult.value.result === 'SPY_NOT_VOTED') {
+  } else if (gameResult.value.result === "TIE_NO_WINNER") {
+    return {
+      emoji: "😐",
+      title: "Everyone Tied!",
+      color: "text-gray-700",
+      barColor: "bg-gray-400",
+      message:
+        "🤝 It was a tie and the spy was among them — no winner this round!",
+    };
+  } else if (gameResult.value.result === "SPY_NOT_VOTED") {
     if (userIsSpy) {
       return {
-        emoji: '🎉',
-        title: 'You Won!',
-        color: 'text-green-600',
-        barColor: 'bg-green-400',
-        message: '😈 The players failed to vote for you — spy mission success!'
+        emoji: "🎉",
+        title: "You Won!",
+        color: "text-green-600",
+        barColor: "bg-green-400",
+        message: "😈 The players failed to vote for you — spy mission success!",
       };
     } else {
       return {
-        emoji: '😞',
-        title: 'You Lost!',
-        color: 'text-red-600',
-        barColor: 'bg-red-400',
-        message: '😞 You failed to identify the spy — they escaped!'
+        emoji: "😞",
+        title: "You Lost!",
+        color: "text-red-600",
+        barColor: "bg-red-400",
+        message: "😞 You failed to identify the spy — they escaped!",
       };
     }
-  } else if (gameResult.value.result === 'SPY_NOT_FOUND' || gameResult.value.winner === 'SPY') {
+  } else if (
+    gameResult.value.result === "SPY_NOT_FOUND" ||
+    gameResult.value.winner === "SPY"
+  ) {
     if (userIsSpy) {
       return {
-        emoji: '🎉',
-        title: 'You Won!',
-        color: 'text-green-600',
-        barColor: 'bg-green-400',
-        message: '😈 You avoided detection and completed your spy mission!'
+        emoji: "🎉",
+        title: "You Won!",
+        color: "text-green-600",
+        barColor: "bg-green-400",
+        message: "😈 You avoided detection and completed your spy mission!",
       };
     } else {
       return {
-        emoji: '😞',
-        title: 'You Lost!',
-        color: 'text-red-600',
-        barColor: 'bg-red-400',
-        message: '😈 The spy avoided detection and escaped!'
+        emoji: "😞",
+        title: "You Lost!",
+        color: "text-red-600",
+        barColor: "bg-red-400",
+        message: "😈 The spy avoided detection and escaped!",
       };
     }
   }
-  
+
   // Default fallback
   return {
-    emoji: '🎮',
-    title: 'Game Over!',
-    color: 'text-purple-600',
-    barColor: 'bg-purple-400',
-    message: 'Game completed!'
+    emoji: "🎮",
+    title: "Game Over!",
+    color: "text-purple-600",
+    barColor: "bg-purple-400",
+    message: "Game completed!",
   };
 });
 </script>

@@ -113,13 +113,12 @@ onMounted(async () => {
     socket.on("gameStarted", (data) => {
       gameStarting.value = true;
       console.log("Game started, navigating to game page...");
-      
+
       // Delay 1 second for user to see the notification
       setTimeout(() => {
         router.push(`/room/${roomId}/game`);
       }, 1000);
     });
-
   } catch (err) {
     router.push("/login");
   }
