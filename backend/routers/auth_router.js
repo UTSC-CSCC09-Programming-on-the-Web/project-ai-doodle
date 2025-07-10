@@ -51,5 +51,5 @@ authRouter.get("/logout", (req, res) => {
 });
 
 authRouter.get("/failure", (req, res) => {
-  res.status(401).json({ error: "Google login failed" });
+  res.status(401).json({ error: "Authentication failed" });
 });
