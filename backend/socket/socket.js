@@ -342,22 +342,58 @@ export function setupSocket(server) {
           voteCount[vote] = (voteCount[vote] || 0) + 1;
         });
         
-        const mostVoted = Object.keys(voteCount).reduce((a, b) => 
-          voteCount[a] > voteCount[b] ? a : b
+        // Find the highest vote count
+        const maxVotes = Math.max(...Object.values(voteCount));
+        const mostVotedPlayers = Object.keys(voteCount).filter(player =>
+          voteCount[player] === maxVotes
         );
+
+        let gameResult;
+
+        if (mostVotedPlayers.length > 1) {
+          const spyInTie = mostVotedPlayers.includes(gameState.spyUsername);
+
+          if (spyInTie) {
+            // Spy is among the tied → no one wins
+            gameResult = {
+              result: "TIE_NO_WINNER",
+              winner: "NONE",
+              secretWord: gameState.secretWord,
+              spy: gameState.spyUsername,
+              voteResults: voteCount,
+              tiedPlayers: mostVotedPlayers,
+              message: "It's a tie and the spy is among the most voted — no winner!"
+            };
+          } else {
+            // Spy not in tied → spy wins
+            gameResult = {
+              result: "SPY_NOT_VOTED",
+              winner: "SPY",
+              secretWord: gameState.secretWord,
+              spy: gameState.spyUsername,
+              voteResults: voteCount,
+              tiedPlayers: mostVotedPlayers,
+              message: "Players failed to identify the spy — Spy wins!"
+            };
+          }
+        } else {
+          const mostVoted = mostVotedPlayers[0];
+          const spyFound = mostVoted === gameState.spyUsername;
+
+          gameResult = {
+            result: spyFound ? "SPY_FOUND" : "SPY_NOT_FOUND",
+            winner: spyFound ? "NON_SPY_PLAYERS" : "SPY",
+            secretWord: gameState.secretWord,
+            spy: gameState.spyUsername,
+            voteResults: voteCount,
+            mostVoted
+          };
+        }
         
-        const spyFound = mostVoted === gameState.spyUsername;
+        console.log(`Voting completed - Vote counts:`, voteCount);
+        console.log(`Result:`, gameResult);
         
-        console.log(`Voting completed - Most voted: ${mostVoted}, Spy: ${gameState.spyUsername}, Spy found: ${spyFound}`);
-        
-        io.to(roomId).emit("gameEnd", {
-          result: spyFound ? "SPY_FOUND" : "SPY_WINS",
-          winner: spyFound ? "NON_SPY_PLAYERS" : "SPY",
-          secretWord: gameState.secretWord,
-          spy: gameState.spyUsername,
-          voteResults: voteCount,
-          mostVoted
-        });
+        io.to(roomId).emit("gameEnd", gameResult);
       } else {
         // Notify room about vote progress
         io.to(roomId).emit("voteProgress", {

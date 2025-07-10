@@ -633,6 +633,10 @@
               <span class="text-gray-600 font-medium">Most Voted:</span>
               <span class="font-semibold text-gray-800">{{ gameResult.mostVoted }}</span>
             </div>
+            <div v-if="gameResult.tiedPlayers && gameResult.tiedPlayers.length > 1" class="flex justify-between items-center">
+              <span class="text-gray-600 font-medium">Tied Players:</span>
+              <span class="font-semibold text-gray-800">{{ gameResult.tiedPlayers.join(', ') }}</span>
+            </div>
           </div>
 
           <!-- Result Message -->
@@ -1025,6 +1029,32 @@ const getDisplayResult = computed(() => {
         color: 'text-green-600',
         barColor: 'bg-green-400',
         message: '🕵️ Spy was caught in voting!'
+      };
+    }
+  } else if (gameResult.value.result === 'TIE_NO_WINNER') {
+      return {
+        emoji: '😐',
+        title: 'Everyone Tied!',
+        color: 'text-gray-700',
+        barColor: 'bg-gray-400',
+        message: '🤝 It was a tie and the spy was among them — no winner this round!'
+      };
+  } else if (gameResult.value.result === 'SPY_NOT_VOTED') {
+    if (userIsSpy) {
+      return {
+        emoji: '🎉',
+        title: 'You Won!',
+        color: 'text-green-600',
+        barColor: 'bg-green-400',
+        message: '😈 The players failed to vote for you — spy mission success!'
+      };
+    } else {
+      return {
+        emoji: '😞',
+        title: 'You Lost!',
+        color: 'text-red-600',
+        barColor: 'bg-red-400',
+        message: '😞 You failed to identify the spy — they escaped!'
       };
     }
   } else if (gameResult.value.result === 'SPY_NOT_FOUND' || gameResult.value.winner === 'SPY') {
