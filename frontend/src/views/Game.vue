@@ -93,7 +93,7 @@ import { computed } from "vue";
 const route = useRoute();
 const router = useRouter();
 
-const socket = io("http://localhost:3000", { withCredentials: true });
+const socket = io(import.meta.env.VITE_BACKEND_URL, { withCredentials: true });
 
 const roomId = route.params.id;
 const room = ref(null);
