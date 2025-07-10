@@ -140,9 +140,9 @@ export function setupSocket(server) {
     socket.on("startGame", async (roomId) => {
       const users = await getRoomUsers(roomId);
 
-      if (users.length < 2) {
+      if (users.length < 4) {
         io.to(roomId).emit("gameError", {
-          message: "Need at least 2 players to start",
+          message: "Need at least 4 players to start",
         });
         return;
       }

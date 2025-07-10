@@ -57,12 +57,24 @@
 
       <button
         v-if="user?.username === room?.creatorUsername"
-        :disabled="!users.length || !users.every((u) => u.ready)"
+        :disabled="!canStartGame"
         @click="startGame"
         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
       >
         Start Game
       </button>
+      <p
+        v-if="!canStartGame && startRestrictionReason"
+        class="mt-2 text-sm text-red-600"
+      >
+        {{ startRestrictionReason }}
+      </p>
+      <p
+        v-if="canStartGame && user?.username !== room?.creatorUsername"
+        class="mt-2 text-sm text-blue-600"
+      >
+        All players are ready. Waiting for the host to start the game…
+      </p>
 
       <p v-if="gameStarting" class="mt-6 text-xl font-bold text-purple-600">
         Game starting, redirecting...
@@ -76,6 +88,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { io } from "socket.io-client";
 import { getCurrentUser, getRoomById } from "../services/api-service";
+import { computed } from "vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -88,6 +101,19 @@ const user = ref(null);
 const users = ref([]);
 const ready = ref(false);
 const gameStarting = ref(false);
+
+const canStartGame = computed(() => {
+  return users.value.length >= 4 && users.value.every((u) => u.ready);
+});
+
+const startRestrictionReason = computed(() => {
+  if (users.value.length < 4) {
+    return "At least 4 players are required to start the game.";
+  } else if (!users.value.every((u) => u.ready)) {
+    return "All players must be ready to start the game.";
+  }
+  return null;
+});
 
 onMounted(async () => {
   try {
