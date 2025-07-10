@@ -119,6 +119,12 @@ onMounted(async () => {
         router.push(`/room/${roomId}/game`);
       }, 1000);
     });
+
+    // Listen for game errors (e.g., insufficient players)
+    socket.on("gameError", (error) => {
+      console.error("Game error:", error.message);
+      alert(error.message);
+    });
   } catch (err) {
     router.push("/login");
   }

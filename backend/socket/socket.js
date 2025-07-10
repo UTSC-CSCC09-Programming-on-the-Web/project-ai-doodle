@@ -140,9 +140,9 @@ export function setupSocket(server) {
     socket.on("startGame", async (roomId) => {
       const users = await getRoomUsers(roomId);
 
-      if (users.length < 2) {
+      if (users.length < 4) {
         io.to(roomId).emit("gameError", {
-          message: "Need at least 2 players to start",
+          message: "Need at least 4 players to start",
         });
         return;
       }
@@ -156,6 +156,12 @@ export function setupSocket(server) {
 
       // Select a spy
       const spyCandidates = shuffledUsers.slice(1, -1); // exclude first and last
+              if (spyCandidates.length === 0) {
+          io.to(roomId).emit("gameError", {
+            message: "Game needs more players to select a spy",
+          });
+          return;
+        }
       const spyIndex = Math.floor(Math.random() * spyCandidates.length);
       const spyUsername = spyCandidates[spyIndex].username;
 
@@ -450,7 +456,7 @@ export function setupSocket(server) {
 
       // If game creator leaves, end the game
       const gameState = gameStates.get(roomId);
-      if (gameState && users.length < 2) {
+      if (gameState && users.length < 4) {
         gameStates.delete(roomId);
         io.to(roomId).emit("gameEnd", {
           result: "GAME_CANCELLED",
