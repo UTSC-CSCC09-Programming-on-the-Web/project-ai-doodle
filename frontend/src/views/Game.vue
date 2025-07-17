@@ -1,84 +1,250 @@
 <template>
-  <div class="p-8 max-w-4xl mx-auto text-center relative">
-    <button
-      @click="handleLeave"
-      class="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-    >
-      Leave Room
-    </button>
-
-    <h1 class="text-3xl font-bold text-blue-700 mb-4">
-      Game Room - {{ room?.name || "Loading..." }}
-    </h1>
-    <p class="text-gray-700 mb-2">
-      Room ID: <span class="font-mono text-lg">{{ roomId }}</span>
-    </p>
-    <p
-      v-if="room && user && room.creatorUsername === user.username"
-      class="text-gray-700 mb-2"
-    >
-      Room Passcode: <span class="font-mono text-lg">{{ room.passcode }}</span>
-    </p>
-    <p class="text-gray-700 mb-6">
-      Player: <span class="font-semibold">{{ user?.username }}</span>
-    </p>
-
-    <div class="bg-white p-6 rounded shadow text-left mb-6">
-      <h2 class="text-xl font-semibold mb-2">Players in Room</h2>
-      <ul>
-        <li
-          v-for="u in users"
-          :key="u.username"
-          class="flex justify-between py-1 border-b"
+  <div class="page-container">
+    <div class="content-container">
+      <!-- Top Navigation -->
+      <nav class="flex justify-between items-center mb-8">
+        <div class="flex items-center space-x-4">
+          <h1 class="text-gradient text-3xl font-bold">Game Room</h1>
+          <span class="badge badge-accent">Waiting</span>
+        </div>
+        
+        <button
+          @click="handleLeave"
+          class="btn-danger btn-sm"
         >
-          <span>
-            {{ u.username }}
-            <span
-              v-if="u.username === room?.creatorUsername"
-              class="text-sm text-blue-500 ml-1"
+          <span class="mr-2">🚪</span>
+          Leave Room
+        </button>
+      </nav>
+
+      <!-- Room Information Card -->
+      <div class="card-gradient p-8 mb-8 text-white text-center animate-fade-in">
+        <div class="space-y-4">
+          <div class="text-6xl">🎯</div>
+          <h2 class="text-3xl font-bold">
+            {{ room?.name || "Loading..." }}
+          </h2>
+          <div class="grid sm:grid-cols-3 gap-4 text-sm max-w-2xl mx-auto">
+            <div class="bg-white bg-opacity-20 rounded-lg p-3">
+              <div class="font-medium">Room ID</div>
+              <div class="font-mono text-lg">{{ roomId }}</div>
+            </div>
+            <div 
+              v-if="room && user && room.creatorUsername === user.username" 
+              class="bg-white bg-opacity-20 rounded-lg p-3"
             >
-              (Host)
-            </span>
-          </span>
-          <span :class="u.ready ? 'text-green-600' : 'text-gray-500'">
-            {{ u.ready ? "Ready" : "Not Ready" }}
-          </span>
-        </li>
-      </ul>
-    </div>
+              <div class="font-medium">Room Password</div>
+              <div class="font-mono text-lg">{{ room.passcode }}</div>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-lg p-3">
+              <div class="font-medium">Your Username</div>
+              <div class="font-semibold text-lg">{{ user?.username }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <div class="mt-4 space-x-4">
-      <button
-        @click="toggleReady"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-      >
-        {{ ready ? "Cancel Ready" : "Ready" }}
-      </button>
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Player List -->
+        <div class="lg:col-span-2">
+          <div class="card p-6">
+            <div class="flex items-center space-x-3 mb-6">
+              <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
+                <span class="text-white text-lg">👥</span>
+              </div>
+              <h2 class="text-xl font-semibold text-neutral-900">
+                Players in Room ({{ users.length }}/8)
+              </h2>
+            </div>
 
-      <button
-        v-if="user?.username === room?.creatorUsername"
-        :disabled="!canStartGame"
-        @click="startGame"
-        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
-      >
-        Start Game
-      </button>
-      <p
-        v-if="!canStartGame && startRestrictionReason"
-        class="mt-2 text-sm text-red-600"
-      >
-        {{ startRestrictionReason }}
-      </p>
-      <p
-        v-if="canStartGame && user?.username !== room?.creatorUsername"
-        class="mt-2 text-sm text-blue-600"
-      >
-        All players are ready. Waiting for the host to start the game…
-      </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div 
+                v-for="(u, index) in users"
+                :key="u.username"
+                class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors duration-200"
+              >
+                <div class="flex items-center space-x-3">
+                  <!-- Player Avatar -->
+                  <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-white font-bold text-base">
+                    {{ u.username.charAt(0).toUpperCase() }}
+                  </div>
+                  
+                  <!-- Player Information -->
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center space-x-2">
+                      <span class="font-semibold text-neutral-900 truncate">{{ u.username }}</span>
+                      
+                      <!-- Tags -->
+                      <div class="flex space-x-1 flex-shrink-0">
+                        <span
+                          v-if="u.username === room?.creatorUsername"
+                          class="badge badge-primary text-xs"
+                        >
+                          Host
+                        </span>
+                        <span
+                          v-if="u.username === user?.username"
+                          class="badge badge-accent text-xs"
+                        >
+                          You
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <!-- Join Order -->
+                    <div class="text-xs text-neutral-500">
+                      {{ index + 1 }}{{ index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th' }} to join
+                    </div>
+                  </div>
+                </div>
 
-      <p v-if="gameStarting" class="mt-6 text-xl font-bold text-purple-600">
-        Game starting, redirecting...
-      </p>
+                <!-- Ready Status -->
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                  <div class="flex items-center space-x-1">
+                    <div 
+                      class="w-2 h-2 rounded-full"
+                      :class="u.ready ? 'bg-success-500' : 'bg-neutral-300'"
+                    ></div>
+                    <span 
+                      class="text-xs font-medium"
+                      :class="u.ready ? 'text-success-600' : 'text-neutral-500'"
+                    >
+                      {{ u.ready ? "Ready" : "Not Ready" }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty Slots Notice -->
+            <div v-if="users.length < 4" class="mt-6 p-4 bg-warning-50 border border-warning-200 rounded-xl">
+              <div class="flex items-center space-x-2 text-warning-800">
+                <span class="text-lg">⚠️</span>
+                <span class="font-medium">At least 4 players needed to start the game</span>
+              </div>
+              <p class="text-sm text-warning-700 mt-1">
+                Currently {{ users.length }}/4 players, need {{ 4 - users.length }} more
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side Control Panel -->
+        <div class="space-y-6">
+          <!-- Ready Status Control -->
+          <div class="card p-6">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-success-500 rounded-lg flex items-center justify-center">
+                <span class="text-white text-lg">✓</span>
+              </div>
+              <h3 class="text-lg font-semibold text-neutral-900">Ready Status</h3>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Current Status Display -->
+              <div class="text-center p-4 rounded-xl" :class="ready ? 'bg-success-50 border border-success-200' : 'bg-neutral-50 border border-neutral-200'">
+                <div class="text-3xl mb-2">{{ ready ? "✅" : "⏳" }}</div>
+                <p class="font-medium" :class="ready ? 'text-success-700' : 'text-neutral-600'">
+                  {{ ready ? "You are ready" : "Waiting for your confirmation" }}
+                </p>
+              </div>
+
+              <!-- Ready Button -->
+              <button
+                @click="toggleReady"
+                class="w-full"
+                :class="ready ? 'btn-warning' : 'btn-success'"
+              >
+                <span class="mr-2">{{ ready ? "⏹️" : "✅" }}</span>
+                {{ ready ? "Cancel Ready" : "Confirm Ready" }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Game Start Control -->
+          <div class="card p-6">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-accent-500 rounded-lg flex items-center justify-center">
+                <span class="text-white text-lg">🚀</span>
+              </div>
+              <h3 class="text-lg font-semibold text-neutral-900">Start Game</h3>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Host Control -->
+              <div v-if="user?.username === room?.creatorUsername">
+                <button
+                  :disabled="!canStartGame"
+                  @click="startGame"
+                  class="btn-primary w-full"
+                  :class="{ 'opacity-50 cursor-not-allowed': !canStartGame }"
+                >
+                  <span class="mr-2">🎮</span>
+                  {{ canStartGame ? "Start Game" : "Waiting for Players" }}
+                </button>
+                
+                <div v-if="startRestrictionReason" class="mt-3 status-warning">
+                  {{ startRestrictionReason }}
+                </div>
+              </div>
+
+              <!-- Non-Host Waiting -->
+              <div v-else class="text-center p-4 bg-primary-50 rounded-xl">
+                <div class="text-2xl mb-2">⏳</div>
+                <p class="text-sm text-primary-700">
+                  {{ canStartGame 
+                    ? "All players ready, waiting for host to start" 
+                    : "Waiting for other players to be ready" 
+                  }}
+                </p>
+              </div>
+
+              <!-- Game Starting -->
+              <div v-if="gameStarting" class="text-center p-4 bg-success-50 rounded-xl">
+                <div class="loading-spinner w-8 h-8 mx-auto mb-3"></div>
+                <p class="text-lg font-medium text-success-700">
+                  Game starting, redirecting...
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game Rules Quick View -->
+          <div class="card p-6">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 bg-warning-500 rounded-lg flex items-center justify-center">
+                <span class="text-white text-lg">📋</span>
+              </div>
+              <h3 class="text-lg font-semibold text-neutral-900">Quick Rules</h3>
+            </div>
+
+            <div class="space-y-3 text-sm">
+              <div class="flex items-start space-x-3">
+                <div class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</div>
+                <span class="text-neutral-700">AI selects secret word and assigns spy</span>
+              </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</div>
+                <span class="text-neutral-700">Generate AI images based on prompts</span>
+              </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</div>
+                <span class="text-neutral-700">Final player guesses the original word</span>
+              </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">4</div>
+                <span class="text-neutral-700">Find the spy or spy wins</span>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-neutral-200">
+              <p class="text-xs text-neutral-500 text-center">
+                🎯 Unleash creativity, test teamwork, enjoy AI art fun
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

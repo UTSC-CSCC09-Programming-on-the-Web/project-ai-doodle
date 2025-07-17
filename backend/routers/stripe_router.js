@@ -55,7 +55,7 @@ stripeRouter.post(
       switch (event.type) {
         case "checkout.session.completed": {
           const session = event.data.object;
-          const userId = session.metadata?.userId;
+          const userId = session.metadata && session.metadata.userId;
 
           if (!userId) {
             console.error("Missing userId in metadata");

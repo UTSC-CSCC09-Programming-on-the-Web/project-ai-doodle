@@ -73,7 +73,7 @@ roomRouter.get("/:id", async (req, res) => {
     }
     const roomData = room.toJSON();
 
-    const requester = req.user?.username;
+    const requester = req.user && req.user.username;
     if (!requester) {
       return res.status(401).json({ error: "Not authenticated" });
     }

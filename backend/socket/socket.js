@@ -66,7 +66,7 @@ async function generateAIImage(prompt, roomId, turn) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error("OpenAI API Error:", errorData);
-      throw new Error(`API call failed: ${errorData.error?.message}`);
+      throw new Error(`API call failed: ${errorData.error && errorData.error.message ? errorData.error.message : 'Unknown error'}`);
     }
 
     const data = await response.json();

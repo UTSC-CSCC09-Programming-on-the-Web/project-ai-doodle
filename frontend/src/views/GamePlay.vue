@@ -1,28 +1,39 @@
 <template>
-  <div class="p-6 max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-purple-700">
-        AI Doodle Game - {{ room?.name || "Loading..." }}
-      </h1>
-      <button
-        @click="handleLeave"
-        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-      >
-        Leave Game
-      </button>
-    </div>
+  <div class="page-container">
+    <div class="content-container">
+      <!-- Top Navigation -->
+      <nav class="flex justify-between items-center mb-8">
+        <div class="flex items-center space-x-4">
+          <h1 class="text-gradient text-3xl font-bold">AI Drawing Game</h1>
+          <span class="badge badge-accent">{{ room?.name || "Loading..." }}</span>
+        </div>
+        
+        <button
+          @click="handleLeave"
+          class="btn-danger btn-sm"
+        >
+          <span class="mr-2">🚪</span>
+          Leave Game
+        </button>
+      </nav>
 
-    <!-- Main Game Interface - Dynamic Layout based on game state -->
-    <div
-      v-if="showPreviousImage && gamePhase === 'IMAGE_GENERATION'"
-      class="grid grid-cols-3 gap-6 h-[600px]"
-    >
-      <!-- Left Column: Previous/Reference Image (Only show when not first player) -->
-      <div class="bg-white rounded-lg shadow-lg p-4">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
-          {{ isYourTurn ? "Previous Image" : "Current Game Progress" }}
-        </h2>
+      <!-- Main Game Interface - Dynamic layout based on game state -->
+      <div
+        v-if="showPreviousImage && gamePhase === 'IMAGE_GENERATION'"
+        class="grid grid-cols-1 lg:grid-cols-3 gap-8"
+      >
+        <!-- Left Side: Reference Image -->
+        <div class="game-card">
+          <div class="game-header mb-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+                <span class="text-white text-sm">🖼️</span>
+              </div>
+              <h2 class="text-lg font-semibold text-neutral-900">
+                {{ isYourTurn ? "Reference Image" : "Current Progress" }}
+              </h2>
+            </div>
+          </div>
         <div
           class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4"
         >
@@ -773,6 +784,8 @@
         </div>
       </div>
     </div>
+  </div>
+
     <!-- Game Result Summary -->
     <div
       v-if="gameResult"

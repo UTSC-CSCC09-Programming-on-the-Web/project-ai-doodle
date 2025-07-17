@@ -35,7 +35,7 @@ export async function generateImageWithAI(prompt, model = "dall-e-3") {
         prompt: prompt.substring(0, 50) + "...",
       });
       throw new Error(
-        `API call failed (${model}): ${errorData.error?.message || response.statusText}`,
+        `API call failed (${model}): ${errorData.error && errorData.error.message ? errorData.error.message : response.statusText}`,
       );
     }
 
