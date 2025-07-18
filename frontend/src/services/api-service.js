@@ -1,7 +1,7 @@
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
 export async function getCurrentUser() {
-  const res = await fetch(`${API_BASE}/api/auth/me`, {
+  const res = await fetch(`${API_BASE}/auth/me`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Not authenticated");
@@ -9,7 +9,7 @@ export async function getCurrentUser() {
 }
 
 export async function logout() {
-  const res = await fetch(`${API_BASE}/api/auth/logout`, {
+  const res = await fetch(`${API_BASE}/auth/logout`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Logout failed");
@@ -17,11 +17,11 @@ export async function logout() {
 }
 
 export function getGoogleLoginUrl() {
-  return `${API_BASE}/api/auth/google`;
+  return `${API_BASE}auth/google`;
 }
 
 export async function createStripeCheckout() {
-  const res = await fetch(`${API_BASE}/api/stripe/checkout`, {
+  const res = await fetch(`${API_BASE}/stripe/checkout`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -31,7 +31,7 @@ export async function createStripeCheckout() {
 }
 
 export async function createRoom(roomData) {
-  const res = await fetch(`${API_BASE}/api/rooms`, {
+  const res = await fetch(`${API_BASE}/rooms`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -47,7 +47,7 @@ export async function createRoom(roomData) {
 }
 
 export async function getRoomById(id) {
-  const res = await fetch(`${API_BASE}/api/rooms/${id}`, {
+  const res = await fetch(`${API_BASE}/rooms/${id}`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to fetch room");
@@ -55,7 +55,7 @@ export async function getRoomById(id) {
 }
 
 export async function joinRoomByName(name, passcode) {
-  const res = await fetch(`${API_BASE}/api/rooms/join`, {
+  const res = await fetch(`${API_BASE}/rooms/join`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
