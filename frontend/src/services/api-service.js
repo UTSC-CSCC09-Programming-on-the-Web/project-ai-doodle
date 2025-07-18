@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000/api";
 
 export async function getCurrentUser() {
   const res = await fetch(`${API_BASE}/auth/me`, {
@@ -17,7 +17,7 @@ export async function logout() {
 }
 
 export function getGoogleLoginUrl() {
-  return `${API_BASE}auth/google`;
+  return `${API_BASE}/auth/google`;
 }
 
 export async function createStripeCheckout() {

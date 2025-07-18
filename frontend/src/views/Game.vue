@@ -7,18 +7,17 @@
           <h1 class="text-gradient text-3xl font-bold">Game Room</h1>
           <span class="badge badge-accent">Waiting</span>
         </div>
-        
-        <button
-          @click="handleLeave"
-          class="btn-danger btn-sm"
-        >
+
+        <button @click="handleLeave" class="btn-danger btn-sm">
           <span class="mr-2">🚪</span>
           Leave Room
         </button>
       </nav>
 
       <!-- Room Information Card -->
-      <div class="card-gradient p-8 mb-8 text-white text-center animate-fade-in">
+      <div
+        class="card-gradient p-8 mb-8 text-white text-center animate-fade-in"
+      >
         <div class="space-y-4">
           <div class="text-6xl">🎯</div>
           <h2 class="text-3xl font-bold">
@@ -29,8 +28,8 @@
               <div class="font-medium">Room ID</div>
               <div class="font-mono text-lg">{{ roomId }}</div>
             </div>
-            <div 
-              v-if="room && user && room.creatorUsername === user.username" 
+            <div
+              v-if="room && user && room.creatorUsername === user.username"
               class="bg-white bg-opacity-20 rounded-lg p-3"
             >
               <div class="font-medium">Room Password</div>
@@ -49,7 +48,9 @@
         <div class="lg:col-span-2">
           <div class="card p-6">
             <div class="flex items-center space-x-3 mb-6">
-              <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
+              <div
+                class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center"
+              >
                 <span class="text-white text-lg">👥</span>
               </div>
               <h2 class="text-xl font-semibold text-neutral-900">
@@ -58,22 +59,26 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div 
+              <div
                 v-for="(u, index) in users"
                 :key="u.username"
                 class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors duration-200"
               >
                 <div class="flex items-center space-x-3">
                   <!-- Player Avatar -->
-                  <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-white font-bold text-base">
+                  <div
+                    class="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-white font-bold text-base"
+                  >
                     {{ u.username.charAt(0).toUpperCase() }}
                   </div>
-                  
+
                   <!-- Player Information -->
                   <div class="min-w-0 flex-1">
                     <div class="flex items-center space-x-2">
-                      <span class="font-semibold text-neutral-900 truncate">{{ u.username }}</span>
-                      
+                      <span class="font-semibold text-neutral-900 truncate">{{
+                        u.username
+                      }}</span>
+
                       <!-- Tags -->
                       <div class="flex space-x-1 flex-shrink-0">
                         <span
@@ -90,10 +95,20 @@
                         </span>
                       </div>
                     </div>
-                    
+
                     <!-- Join Order -->
                     <div class="text-xs text-neutral-500">
-                      {{ index + 1 }}{{ index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th' }} to join
+                      {{ index + 1
+                      }}{{
+                        index === 0
+                          ? "st"
+                          : index === 1
+                            ? "nd"
+                            : index === 2
+                              ? "rd"
+                              : "th"
+                      }}
+                      to join
                     </div>
                   </div>
                 </div>
@@ -101,11 +116,11 @@
                 <!-- Ready Status -->
                 <div class="flex items-center space-x-2 flex-shrink-0">
                   <div class="flex items-center space-x-1">
-                    <div 
+                    <div
                       class="w-2 h-2 rounded-full"
                       :class="u.ready ? 'bg-success-500' : 'bg-neutral-300'"
                     ></div>
-                    <span 
+                    <span
                       class="text-xs font-medium"
                       :class="u.ready ? 'text-success-600' : 'text-neutral-500'"
                     >
@@ -117,13 +132,19 @@
             </div>
 
             <!-- Empty Slots Notice -->
-            <div v-if="users.length < 4" class="mt-6 p-4 bg-warning-50 border border-warning-200 rounded-xl">
+            <div
+              v-if="users.length < 4"
+              class="mt-6 p-4 bg-warning-50 border border-warning-200 rounded-xl"
+            >
               <div class="flex items-center space-x-2 text-warning-800">
                 <span class="text-lg">⚠️</span>
-                <span class="font-medium">At least 4 players needed to start the game</span>
+                <span class="font-medium"
+                  >At least 4 players needed to start the game</span
+                >
               </div>
               <p class="text-sm text-warning-700 mt-1">
-                Currently {{ users.length }}/4 players, need {{ 4 - users.length }} more
+                Currently {{ users.length }}/4 players, need
+                {{ 4 - users.length }} more
               </p>
             </div>
           </div>
@@ -134,18 +155,34 @@
           <!-- Ready Status Control -->
           <div class="card p-6">
             <div class="flex items-center space-x-3 mb-4">
-              <div class="w-10 h-10 bg-success-500 rounded-lg flex items-center justify-center">
+              <div
+                class="w-10 h-10 bg-success-500 rounded-lg flex items-center justify-center"
+              >
                 <span class="text-white text-lg">✓</span>
               </div>
-              <h3 class="text-lg font-semibold text-neutral-900">Ready Status</h3>
+              <h3 class="text-lg font-semibold text-neutral-900">
+                Ready Status
+              </h3>
             </div>
 
             <div class="space-y-4">
               <!-- Current Status Display -->
-              <div class="text-center p-4 rounded-xl" :class="ready ? 'bg-success-50 border border-success-200' : 'bg-neutral-50 border border-neutral-200'">
+              <div
+                class="text-center p-4 rounded-xl"
+                :class="
+                  ready
+                    ? 'bg-success-50 border border-success-200'
+                    : 'bg-neutral-50 border border-neutral-200'
+                "
+              >
                 <div class="text-3xl mb-2">{{ ready ? "✅" : "⏳" }}</div>
-                <p class="font-medium" :class="ready ? 'text-success-700' : 'text-neutral-600'">
-                  {{ ready ? "You are ready" : "Waiting for your confirmation" }}
+                <p
+                  class="font-medium"
+                  :class="ready ? 'text-success-700' : 'text-neutral-600'"
+                >
+                  {{
+                    ready ? "You are ready" : "Waiting for your confirmation"
+                  }}
                 </p>
               </div>
 
@@ -164,7 +201,9 @@
           <!-- Game Start Control -->
           <div class="card p-6">
             <div class="flex items-center space-x-3 mb-4">
-              <div class="w-10 h-10 bg-accent-500 rounded-lg flex items-center justify-center">
+              <div
+                class="w-10 h-10 bg-accent-500 rounded-lg flex items-center justify-center"
+              >
                 <span class="text-white text-lg">🚀</span>
               </div>
               <h3 class="text-lg font-semibold text-neutral-900">Start Game</h3>
@@ -182,7 +221,7 @@
                   <span class="mr-2">🎮</span>
                   {{ canStartGame ? "Start Game" : "Waiting for Players" }}
                 </button>
-                
+
                 <div v-if="startRestrictionReason" class="mt-3 status-warning">
                   {{ startRestrictionReason }}
                 </div>
@@ -192,15 +231,19 @@
               <div v-else class="text-center p-4 bg-primary-50 rounded-xl">
                 <div class="text-2xl mb-2">⏳</div>
                 <p class="text-sm text-primary-700">
-                  {{ canStartGame 
-                    ? "All players ready, waiting for host to start" 
-                    : "Waiting for other players to be ready" 
+                  {{
+                    canStartGame
+                      ? "All players ready, waiting for host to start"
+                      : "Waiting for other players to be ready"
                   }}
                 </p>
               </div>
 
               <!-- Game Starting -->
-              <div v-if="gameStarting" class="text-center p-4 bg-success-50 rounded-xl">
+              <div
+                v-if="gameStarting"
+                class="text-center p-4 bg-success-50 rounded-xl"
+              >
                 <div class="loading-spinner w-8 h-8 mx-auto mb-3"></div>
                 <p class="text-lg font-medium text-success-700">
                   Game starting, redirecting...
@@ -212,27 +255,53 @@
           <!-- Game Rules Quick View -->
           <div class="card p-6">
             <div class="flex items-center space-x-3 mb-4">
-              <div class="w-10 h-10 bg-warning-500 rounded-lg flex items-center justify-center">
+              <div
+                class="w-10 h-10 bg-warning-500 rounded-lg flex items-center justify-center"
+              >
                 <span class="text-white text-lg">📋</span>
               </div>
-              <h3 class="text-lg font-semibold text-neutral-900">Quick Rules</h3>
+              <h3 class="text-lg font-semibold text-neutral-900">
+                Quick Rules
+              </h3>
             </div>
 
             <div class="space-y-3 text-sm">
               <div class="flex items-start space-x-3">
-                <div class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</div>
-                <span class="text-neutral-700">AI selects secret word and assigns spy</span>
+                <div
+                  class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
+                >
+                  1
+                </div>
+                <span class="text-neutral-700"
+                  >AI selects secret word and assigns spy</span
+                >
               </div>
               <div class="flex items-start space-x-3">
-                <div class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</div>
-                <span class="text-neutral-700">Generate AI images based on prompts</span>
+                <div
+                  class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
+                >
+                  2
+                </div>
+                <span class="text-neutral-700"
+                  >Generate AI images based on prompts</span
+                >
               </div>
               <div class="flex items-start space-x-3">
-                <div class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</div>
-                <span class="text-neutral-700">Final player guesses the original word</span>
+                <div
+                  class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
+                >
+                  3
+                </div>
+                <span class="text-neutral-700"
+                  >Final player guesses the original word</span
+                >
               </div>
               <div class="flex items-start space-x-3">
-                <div class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">4</div>
+                <div
+                  class="w-6 h-6 bg-primary-100 text-primary-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
+                >
+                  4
+                </div>
                 <span class="text-neutral-700">Find the spy or spy wins</span>
               </div>
             </div>

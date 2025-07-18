@@ -7,20 +7,14 @@
           <h1 class="text-gradient text-3xl font-bold">AI Doodle</h1>
           <span class="badge badge-primary">Game Lobby</span>
         </div>
-        
+
         <div class="flex items-center space-x-3">
-          <button
-            @click="goToGenerate"
-            class="btn-accent btn-sm"
-          >
+          <button @click="goToGenerate" class="btn-accent btn-sm">
             <span class="mr-2">🎨</span>
             AI Image Generator
           </button>
-          
-          <button
-            @click="handleLogout"
-            class="btn-ghost btn-sm"
-          >
+
+          <button @click="handleLogout" class="btn-ghost btn-sm">
             <span class="mr-2">👋</span>
             Logout
           </button>
@@ -28,12 +22,15 @@
       </nav>
 
       <!-- Welcome Area -->
-      <div class="card-gradient p-8 mb-8 text-white text-center animate-fade-in">
+      <div
+        class="card-gradient p-8 mb-8 text-white text-center animate-fade-in"
+      >
         <div class="space-y-4">
           <div class="text-6xl">🎨</div>
           <h2 class="text-3xl font-bold">Welcome to the AI Art World</h2>
           <p class="text-lg opacity-90">
-            Experience the unique multiplayer AI drawing guessing game, unleash creativity and test teamwork!
+            Experience the unique multiplayer AI drawing guessing game, unleash
+            creativity and test teamwork!
           </p>
         </div>
       </div>
@@ -48,14 +45,31 @@
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
+                  <div
+                    class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center"
+                  >
                     <span class="text-white text-lg">📋</span>
                   </div>
-                  <h3 class="text-xl font-semibold text-primary-700">Game Rules</h3>
+                  <h3 class="text-xl font-semibold text-primary-700">
+                    Game Rules
+                  </h3>
                 </div>
-                <span class="text-primary-600 transform transition-transform duration-200" :class="{ 'rotate-180': showRules }">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                <span
+                  class="text-primary-600 transform transition-transform duration-200"
+                  :class="{ 'rotate-180': showRules }"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
                   </svg>
                 </span>
               </div>
@@ -65,36 +79,69 @@
               <div class="grid sm:grid-cols-2 gap-6">
                 <div class="space-y-4">
                   <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-success-100 text-success-600 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                    <div
+                      class="w-8 h-8 bg-success-100 text-success-600 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    >
+                      1
+                    </div>
                     <div>
                       <h4 class="font-semibold text-neutral-900">Game Start</h4>
-                      <p class="text-sm text-neutral-600 mt-1">AI randomly selects a secret word and assigns one player as the spy</p>
+                      <p class="text-sm text-neutral-600 mt-1">
+                        AI randomly selects a secret word and assigns one player
+                        as the spy
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-success-100 text-success-600 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                    <div
+                      class="w-8 h-8 bg-success-100 text-success-600 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    >
+                      2
+                    </div>
                     <div>
-                      <h4 class="font-semibold text-neutral-900">Image Generation</h4>
-                      <p class="text-sm text-neutral-600 mt-1">The first player (non-spy) sees the word and writes a prompt to generate an AI image</p>
+                      <h4 class="font-semibold text-neutral-900">
+                        Image Generation
+                      </h4>
+                      <p class="text-sm text-neutral-600 mt-1">
+                        The first player (non-spy) sees the word and writes a
+                        prompt to generate an AI image
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 <div class="space-y-4">
                   <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-accent-100 text-accent-600 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                    <div
+                      class="w-8 h-8 bg-accent-100 text-accent-600 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    >
+                      3
+                    </div>
                     <div>
-                      <h4 class="font-semibold text-neutral-900">Prompt Passing</h4>
-                      <p class="text-sm text-neutral-600 mt-1">Next player only sees the previous image and describes it to generate a new image</p>
+                      <h4 class="font-semibold text-neutral-900">
+                        Prompt Passing
+                      </h4>
+                      <p class="text-sm text-neutral-600 mt-1">
+                        Next player only sees the previous image and describes
+                        it to generate a new image
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-accent-100 text-accent-600 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0">4</div>
+                    <div
+                      class="w-8 h-8 bg-accent-100 text-accent-600 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    >
+                      4
+                    </div>
                     <div>
-                      <h4 class="font-semibold text-neutral-900">Final Guess</h4>
-                      <p class="text-sm text-neutral-600 mt-1">Last player guesses the original word</p>
+                      <h4 class="font-semibold text-neutral-900">
+                        Final Guess
+                      </h4>
+                      <p class="text-sm text-neutral-600 mt-1">
+                        Last player guesses the original word
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -102,7 +149,9 @@
 
               <!-- Win Conditions -->
               <div class="bg-neutral-50 rounded-xl p-4">
-                <h4 class="font-semibold text-neutral-900 mb-3 flex items-center">
+                <h4
+                  class="font-semibold text-neutral-900 mb-3 flex items-center"
+                >
                   <span class="mr-2">🏆</span>
                   Win Conditions
                 </h4>
@@ -110,17 +159,23 @@
                   <div class="space-y-2">
                     <div class="flex items-center space-x-2">
                       <span class="w-2 h-2 bg-success-500 rounded-full"></span>
-                      <span class="text-neutral-700">Correct guess: Non-spy players win</span>
+                      <span class="text-neutral-700"
+                        >Correct guess: Non-spy players win</span
+                      >
                     </div>
                     <div class="flex items-center space-x-2">
                       <span class="w-2 h-2 bg-danger-500 rounded-full"></span>
-                      <span class="text-neutral-700">Wrong guess: Vote to find the spy</span>
+                      <span class="text-neutral-700"
+                        >Wrong guess: Vote to find the spy</span
+                      >
                     </div>
                   </div>
                   <div class="space-y-2">
                     <div class="flex items-center space-x-2">
                       <span class="w-2 h-2 bg-warning-500 rounded-full"></span>
-                      <span class="text-neutral-700">Spy found: Other players win</span>
+                      <span class="text-neutral-700"
+                        >Spy found: Other players win</span
+                      >
                     </div>
                     <div class="flex items-center space-x-2">
                       <span class="w-2 h-2 bg-primary-500 rounded-full"></span>
@@ -132,14 +187,27 @@
 
               <!-- Detailed Rules -->
               <details class="bg-primary-50 rounded-xl p-4">
-                <summary class="cursor-pointer text-primary-700 font-medium hover:text-primary-800 transition-colors">
+                <summary
+                  class="cursor-pointer text-primary-700 font-medium hover:text-primary-800 transition-colors"
+                >
                   Click for detailed rules
                 </summary>
                 <div class="mt-3 space-y-2 text-sm text-neutral-600">
-                  <p>• The spy never sees the original word and is never the first player</p>
-                  <p>• Each player can only see the previous image, not the full chain</p>
-                  <p>• Prompts should not directly reveal the secret word or synonyms</p>
-                  <p>• Final guesses must be reasonable synonyms to be accepted</p>
+                  <p>
+                    • The spy never sees the original word and is never the
+                    first player
+                  </p>
+                  <p>
+                    • Each player can only see the previous image, not the full
+                    chain
+                  </p>
+                  <p>
+                    • Prompts should not directly reveal the secret word or
+                    synonyms
+                  </p>
+                  <p>
+                    • Final guesses must be reasonable synonyms to be accepted
+                  </p>
                   <p>• Voting is anonymous and majority rules</p>
                 </div>
               </details>
@@ -152,7 +220,9 @@
           <!-- Join Room -->
           <div class="card p-6">
             <div class="flex items-center space-x-3 mb-4">
-              <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
+              <div
+                class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center"
+              >
                 <span class="text-white text-lg">🚪</span>
               </div>
               <h3 class="text-xl font-semibold text-neutral-900">Join Room</h3>
@@ -179,10 +249,7 @@
                   placeholder="Enter room password"
                 />
               </div>
-              <button
-                type="submit"
-                class="btn-primary w-full"
-              >
+              <button type="submit" class="btn-primary w-full">
                 <span class="mr-2">🎮</span>
                 Join Room
               </button>
@@ -196,10 +263,14 @@
           <!-- Create Room -->
           <div class="card p-6">
             <div class="flex items-center space-x-3 mb-4">
-              <div class="w-10 h-10 bg-success-500 rounded-lg flex items-center justify-center">
+              <div
+                class="w-10 h-10 bg-success-500 rounded-lg flex items-center justify-center"
+              >
                 <span class="text-white text-lg">➕</span>
               </div>
-              <h3 class="text-xl font-semibold text-neutral-900">Create Room</h3>
+              <h3 class="text-xl font-semibold text-neutral-900">
+                Create Room
+              </h3>
             </div>
 
             <form @submit.prevent="handleCreateRoom" class="space-y-4">
@@ -223,10 +294,7 @@
                   placeholder="Set room password"
                 />
               </div>
-              <button
-                type="submit"
-                class="btn-success w-full"
-              >
+              <button type="submit" class="btn-success w-full">
                 <span class="mr-2">🏗️</span>
                 Create Room
               </button>
@@ -240,12 +308,14 @@
           <!-- Game Stats -->
           <div class="card p-6">
             <div class="flex items-center space-x-3 mb-4">
-              <div class="w-10 h-10 bg-accent-500 rounded-lg flex items-center justify-center">
+              <div
+                class="w-10 h-10 bg-accent-500 rounded-lg flex items-center justify-center"
+              >
                 <span class="text-white text-lg">📊</span>
               </div>
               <h3 class="text-xl font-semibold text-neutral-900">Game Info</h3>
             </div>
-            
+
             <div class="space-y-3">
               <div class="flex justify-between items-center">
                 <span class="text-neutral-600">Recommended Players</span>
