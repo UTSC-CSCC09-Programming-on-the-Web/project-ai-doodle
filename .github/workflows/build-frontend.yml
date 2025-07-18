@@ -44,5 +44,5 @@ jobs:
           key: ${{ secrets.VM_DEPLOY_KEY }}
           script: |
             cd ~/project-ai-doodle
-            docker compose pull frontend
-            docker compose up -d frontend
+            docker-compose pull frontend
+            docker-compose up -d frontend
