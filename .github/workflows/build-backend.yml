@@ -44,7 +44,7 @@ jobs:
           script: |
             cd ~/project-ai-doodle
             docker-compose pull backend
-            docker-compose up -d --no-deps --force-recreate backend
+            docker-compose up -d backend
 
       - name: Check code is up to date
         run: docker run --rm $IMAGE_NAME ls -l /app
