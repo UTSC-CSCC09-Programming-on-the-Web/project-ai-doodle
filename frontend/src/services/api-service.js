@@ -52,6 +52,8 @@ export async function getRoomById(id) {
   });
   if (res.status === 403) {
     throw new Error("Not authenticated to view this room");
+  } else if (res.status === 404) {
+    throw new Error("Room not found");
   }
   if (!res.ok) throw new Error("Failed to fetch room");
   return res.json();
@@ -69,4 +71,19 @@ export async function joinRoomByName(name, passcode) {
   if (!res.ok) throw new Error(data.error || "Failed to join room");
 
   return data.room;
+}
+
+export async function deleteRoom(roomId) {
+  const res = await fetch(`${API_BASE}/rooms/${roomId}`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Failed to delete room");
+  }
+
+  return res.json();
 }

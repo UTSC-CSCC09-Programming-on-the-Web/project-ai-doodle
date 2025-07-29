@@ -10,11 +10,58 @@
           }}</span>
         </div>
 
-        <button @click="handleLeave" class="btn-danger btn-sm">
-          <span class="mr-2">🚪</span>
-          Leave Game
-        </button>
+        <div class="flex items-center space-x-2">
+          <!-- Host Controls: Only End Game Button -->
+          <div v-if="user?.username === room?.creatorUsername">
+            <button
+              v-if="!gameEndingCountdown"
+              @click="endGame"
+              class="btn-warning btn-sm"
+            >
+              <span class="mr-2">⏹️</span>
+              End Game
+            </button>
+          </div>
+
+          <!-- Non-Host: No buttons during active game -->
+          <!-- Players can only leave through the host ending the game -->
+        </div>
       </nav>
+
+      <!-- Game Ending Countdown Notice -->
+      <div
+        v-if="gameEndingCountdown > 0"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div
+          class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 border-2 border-orange-200"
+        >
+          <div class="text-center space-y-6">
+            <div class="text-6xl">⏹️</div>
+            <h2 class="text-2xl font-bold text-orange-800">Game Ending</h2>
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <div class="flex items-center justify-center space-x-2 mb-2">
+                <span class="text-2xl">⏰</span>
+                <span class="text-orange-800 font-semibold text-lg">
+                  Returning to lobby in {{ gameEndingCountdown }}s
+                </span>
+              </div>
+              <p class="text-orange-700 text-sm">
+                Host has ended the game. All players will be reset to unready
+                state.
+              </p>
+              <div class="w-full bg-orange-200 rounded-full h-2 mt-3">
+                <div
+                  class="bg-orange-500 h-2 rounded-full transition-all duration-1000"
+                  :style="{
+                    width: `${((10 - gameEndingCountdown) / 10) * 100}%`,
+                  }"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Main Game Interface - Dynamic layout based on game state -->
       <div
@@ -68,9 +115,9 @@
             class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4"
           >
             <img
-              v-if="currentImage"
-              :src="currentImage"
-              alt="Your generated image"
+              v-if="userGeneratedImage || currentImage"
+              :src="userGeneratedImage || currentImage"
+              alt="Generated image"
               class="max-w-full max-h-full object-contain rounded-lg"
             />
             <div v-else class="text-gray-500 text-center">
@@ -87,8 +134,49 @@
             </div>
           </div>
 
-          <!-- Prompt Input Area - Only show when it's user's turn -->
-          <div v-if="isYourTurn" class="space-y-3">
+          <!-- Show different content based on completion status -->
+          <div
+            v-if="
+              hasCompletedGeneration && (userGeneratedImage || currentImage)
+            "
+            class="space-y-3"
+          >
+            <!-- Completion message when user has finished generating -->
+            <div
+              class="bg-green-50 border border-green-200 p-4 rounded-lg text-center"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <h3 class="font-semibold text-green-800 mb-2">
+                Image Generation Completed!
+              </h3>
+              <p class="text-sm text-green-700 mb-3">
+                You have successfully completed the image generation, waiting
+                for the next player to continue...
+              </p>
+            </div>
+
+            <!-- Show generation success status if still visible -->
+            <div
+              v-if="generationStatus"
+              class="text-sm text-center p-2 rounded bg-green-50 text-green-700"
+            >
+              {{ generationStatus.message }}
+            </div>
+
+            <!-- Show current player status for completed users -->
+            <div class="bg-blue-50 p-3 rounded-lg text-center">
+              <p class="text-blue-700 text-sm">
+                <span class="font-medium">{{ currentPlayer }}</span> is
+                thinking...
+              </p>
+            </div>
+          </div>
+
+          <!-- Prompt Input Area - Only show when it's user's turn and hasn't completed -->
+          <div
+            v-else-if="isYourTurn && !hasCompletedGeneration"
+            class="space-y-3"
+          >
             <div
               v-if="showSecretWord && secretWord"
               class="bg-blue-50 p-3 rounded border"
@@ -134,8 +222,13 @@
             </div>
           </div>
 
-          <!-- Waiting message for other players -->
-          <div v-else class="space-y-3">
+          <!-- Waiting message for other players (only when no image generated AND not completed) -->
+          <div
+            v-else-if="
+              !userGeneratedImage && !currentImage && !hasCompletedGeneration
+            "
+            class="space-y-3"
+          >
             <div class="bg-gray-50 p-4 rounded-lg text-center">
               <p class="text-gray-600 mb-2">
                 <span class="font-medium">{{ currentPlayer }}</span> is
@@ -281,8 +374,8 @@
             class="h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-4"
           >
             <img
-              v-if="currentImage"
-              :src="currentImage"
+              v-if="userGeneratedImage || currentImage"
+              :src="userGeneratedImage || currentImage"
               alt="Your generated image"
               class="max-w-full max-h-full object-contain rounded-lg"
             />
@@ -303,8 +396,46 @@
             </div>
           </div>
 
-          <!-- Prompt Input Area - Only show when it's user's turn -->
-          <div v-if="isYourTurn" class="space-y-3">
+          <!-- Show different content based on completion status -->
+          <div
+            v-if="
+              hasCompletedGeneration && (userGeneratedImage || currentImage)
+            "
+            class="space-y-3"
+          >
+            <!-- Completion message when user has finished generating -->
+            <div
+              class="bg-green-50 border border-green-200 p-4 rounded-lg text-center"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <h3 class="font-semibold text-green-800 mb-2">
+                Image Generation Completed!
+              </h3>
+              <p class="text-sm text-green-700 mb-3">
+                You have successfully completed the image generation, waiting
+                for the next player to continue...
+              </p>
+            </div>
+
+            <!-- Show generation success status if still visible -->
+            <div
+              v-if="generationStatus"
+              class="text-sm text-center p-2 rounded bg-green-50 text-green-700"
+            >
+              {{ generationStatus.message }}
+            </div>
+
+            <!-- Show current player status for completed users -->
+            <div class="bg-blue-50 p-3 rounded-lg text-center">
+              <p class="text-blue-700 text-sm">
+                <span class="font-medium">{{ currentPlayer }}</span> is
+                thinking...
+              </p>
+            </div>
+          </div>
+
+          <!-- Prompt Input Area - Only show when it's user's turn and hasn't completed -->
+          <div v-if="isYourTurn && !hasCompletedGeneration" class="space-y-3">
             <div
               v-if="showSecretWord && secretWord"
               class="bg-blue-50 p-3 rounded border"
@@ -350,8 +481,40 @@
             </div>
           </div>
 
-          <!-- Waiting message for other players -->
-          <div v-else class="space-y-3">
+          <!-- Completion message when user has finished their turn -->
+          <div
+            v-else-if="isYourTurn && hasCompletedGeneration"
+            class="space-y-3"
+          >
+            <div
+              class="bg-green-50 border border-green-200 p-4 rounded-lg text-center"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <h3 class="font-semibold text-green-800 mb-2">
+                Image Generation Completed!
+              </h3>
+              <p class="text-sm text-green-700 mb-3">
+                You have successfully completed the image generation, waiting
+                for the next player to continue...
+              </p>
+            </div>
+
+            <!-- Show generation success status if still visible -->
+            <div
+              v-if="generationStatus"
+              class="text-sm text-center p-2 rounded bg-green-50 text-green-700"
+            >
+              {{ generationStatus.message }}
+            </div>
+          </div>
+
+          <!-- Waiting message for other players (only when no image generated AND not completed) -->
+          <div
+            v-else-if="
+              !userGeneratedImage && !currentImage && !hasCompletedGeneration
+            "
+            class="space-y-3"
+          >
             <div class="bg-gray-50 p-4 rounded-lg text-center">
               <p class="text-gray-600 mb-2">
                 <span class="font-medium">{{ currentPlayer }}</span> is
@@ -866,13 +1029,35 @@
             </p>
           </div>
 
+          <!-- Countdown Notice -->
+          <div
+            v-if="countdown > 0"
+            class="bg-orange-50 border border-orange-200 rounded-lg p-4"
+          >
+            <div class="flex items-center justify-center space-x-2 mb-2">
+              <span class="text-2xl">⏰</span>
+              <span class="text-orange-800 font-semibold text-lg">
+                Auto-redirect in {{ countdown }}s
+              </span>
+            </div>
+            <p class="text-orange-700 text-sm">
+              Room will be destroyed and you'll be redirected to home page.
+            </p>
+            <div class="w-full bg-orange-200 rounded-full h-2 mt-3">
+              <div
+                class="bg-orange-500 h-2 rounded-full transition-all duration-1000"
+                :style="{ width: `${((30 - countdown) / 30) * 100}%` }"
+              ></div>
+            </div>
+          </div>
+
           <!-- Action Button -->
           <div>
             <button
               @click="handleLeave"
               class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
             >
-              🏠 Back to Home
+              🏠 Back to Home{{ countdown > 0 ? ` (${countdown}s)` : "" }}
             </button>
           </div>
         </div>
@@ -919,6 +1104,8 @@ const currentGamePlayer = ref("");
 const isGenerating = ref(false);
 const generatingMessage = ref("Generating image...");
 const generationStatus = ref(null);
+const hasCompletedGeneration = ref(false);
+const userGeneratedImage = ref("");
 
 // Final guess state
 const finalGuess = ref("");
@@ -933,6 +1120,8 @@ const allImages = ref([]);
 const revealedSecretWord = ref("");
 const finalGuessResult = ref("");
 const gameResult = ref(null);
+const countdown = ref(0);
+const gameEndingCountdown = ref(0);
 
 // Input
 const prompt = ref("");
@@ -989,16 +1178,32 @@ onMounted(async () => {
     socket.on("gameUpdate", (gameState) => {
       console.log("Received game update:", gameState);
 
+      const wasYourTurn = isYourTurn.value;
+      const newIsYourTurn = gameState.currentPlayer === user.value.username;
+
       currentPlayer.value = gameState.currentPlayer;
       currentTurn.value = gameState.turn;
       totalTurns.value = gameState.totalTurns;
       gamePhase.value = gameState.gamePhase || "IMAGE_GENERATION";
       secretWord.value = gameState.secretWord || "";
-      isYourTurn.value = gameState.currentPlayer === user.value.username;
+      isYourTurn.value = newIsYourTurn;
       isSpy.value = gameState.isSpy || false;
       isFirstPlayer.value = gameState.isFirstPlayer || false;
-      showPreviousImage.value = gameState.showPreviousImage !== false; // Default to true if not specified
+      showPreviousImage.value = gameState.showPreviousImage !== false;
       playerOrder.value = gameState.playerOrder || [];
+
+      if (gameState.userGeneratedImage) {
+        userGeneratedImage.value = gameState.userGeneratedImage;
+        currentImage.value = gameState.userGeneratedImage;
+      }
+
+      if (gameState.hasCompletedGeneration !== undefined) {
+        hasCompletedGeneration.value = gameState.hasCompletedGeneration;
+      }
+
+      if (userGeneratedImage.value && !newIsYourTurn) {
+        currentImage.value = userGeneratedImage.value;
+      }
 
       // Show secret word only if provided by server
       showSecretWord.value = !!gameState.secretWord;
@@ -1015,7 +1220,7 @@ onMounted(async () => {
       }
 
       console.log(
-        `Game state updated - Phase: ${gamePhase.value}, Turn: ${currentTurn.value}, Current: ${currentPlayer.value}, Your turn: ${isYourTurn.value}, FirstPlayer: ${isFirstPlayer.value}, ShowPrevious: ${showPreviousImage.value}, Secret: ${secretWord.value ? "YES" : "NO"}, Spy: ${isSpy.value}`,
+        `Game state updated - Phase: ${gamePhase.value}, Turn: ${currentTurn.value}, Current: ${currentPlayer.value}, Your turn: ${isYourTurn.value}, FirstPlayer: ${isFirstPlayer.value}, ShowPrevious: ${showPreviousImage.value}, Secret: ${secretWord.value ? "YES" : "NO"}, Spy: ${isSpy.value}, UserImage: ${userGeneratedImage.value ? "YES" : "NO"}, Completed: ${hasCompletedGeneration.value}`,
       );
     });
 
@@ -1068,23 +1273,49 @@ onMounted(async () => {
       console.log("Image generated:", data);
       if (data.player === user.value.username) {
         currentImage.value = data.imageUrl;
+        userGeneratedImage.value = data.imageUrl;
         isGenerating.value = false;
+        hasCompletedGeneration.value = true;
         prompt.value = ""; // Clear prompt after successful generation
         generationStatus.value = {
           type: "success",
-          message: data.message || "Image generated successfully!",
+          message:
+            "Image generated successfully! Waiting for the next player to continue...",
         };
 
-        // Clear status after 3 seconds
         setTimeout(() => {
           generationStatus.value = null;
-        }, 3000);
+        }, 5000);
       }
     });
 
-    // Listen for game errors
+    // Listen for game ending countdown
+    socket.on("gameEndingCountdown", (data) => {
+      console.log("Game ending countdown:", data.countdown);
+      gameEndingCountdown.value = data.countdown;
+    });
+
+    // Listen for game ended by host
+    socket.on("gameEnded", (data) => {
+      console.log("Game ended by host:", data.message);
+      gameEndingCountdown.value = 0;
+      // Redirect to game lobby
+      router.push(`/room/${roomId}`);
+    });
+
+    // Listen for game errors (like trying to join active game)
     socket.on("gameError", (error) => {
       console.error("Game error:", error.message);
+      // Show error message to user
+      alert(error.message);
+
+      // If redirect flag is set, redirect to home page
+      if (error.redirect) {
+        router.push("/home");
+        return;
+      }
+
+      // Reset states if needed for other errors
       isGenerating.value = false;
       isSubmittingGuess.value = false;
 
@@ -1114,13 +1345,21 @@ onMounted(async () => {
       gameResult.value = data;
     });
 
-    // Listen for users leaving the game
-    socket.on("userLeftGame", (data) => {
-      console.log(`${data.username} left the game`);
+    // Listen for countdown updates
+    socket.on("gameEndCountdown", (data) => {
+      console.log("Countdown update:", data.countdown);
+      countdown.value = data.countdown;
+    });
+
+    // Listen for room destruction
+    socket.on("roomDestroyed", (data) => {
+      console.log("Room destroyed:", data.message);
+      // Force redirect to home
+      handleLeave();
     });
   } catch (err) {
     console.error("Failed to load game:", err);
-    router.push("/login");
+    router.push("/home");
   }
 });
 
@@ -1216,11 +1455,18 @@ const submitVote = async () => {
   }, 1000);
 };
 
+const endGame = () => {
+  if (user.value?.username === room.value?.creatorUsername) {
+    socket.emit("endGame", {
+      roomId,
+      username: user.value.username,
+    });
+  }
+};
+
 const handleLeave = () => {
-  socket.emit("leaveGame", {
-    roomId,
-    username: user.value.username,
-  });
+  // Only allow host to leave (through end game)
+  // This function is kept for game end redirects
   socket.disconnect();
   router.push("/home");
 };

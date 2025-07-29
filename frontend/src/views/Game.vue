@@ -8,10 +8,23 @@
           <span class="badge badge-accent">Waiting</span>
         </div>
 
-        <button @click="handleLeave" class="btn-danger btn-sm">
-          <span class="mr-2">🚪</span>
-          Leave Room
-        </button>
+        <div class="flex items-center space-x-2">
+          <!-- Host Controls: Delete Room Button -->
+          <div
+            v-if="user?.username === room?.creatorUsername"
+            class="flex space-x-2"
+          >
+            <button @click="showDeleteConfirm = true" class="btn-danger btn-sm">
+              <span class="mr-2">🗑️</span>
+              Delete Room
+            </button>
+          </div>
+
+          <button @click="handleLeave" class="btn-warning btn-sm">
+            <span class="mr-2">🚪</span>
+            Leave Room
+          </button>
+        </div>
       </nav>
 
       <!-- Room Information Card -->
@@ -113,8 +126,9 @@
                   </div>
                 </div>
 
-                <!-- Ready Status -->
-                <div class="flex items-center space-x-2 flex-shrink-0">
+                <!-- Right Side: Ready Status and Actions -->
+                <div class="flex items-center space-x-3 flex-shrink-0">
+                  <!-- Ready Status -->
                   <div class="flex items-center space-x-1">
                     <div
                       class="w-2 h-2 rounded-full"
@@ -126,6 +140,22 @@
                     >
                       {{ u.ready ? "Ready" : "Not Ready" }}
                     </span>
+                  </div>
+
+                  <!-- Host Actions: Remove Player Button -->
+                  <div
+                    v-if="
+                      user?.username === room?.creatorUsername &&
+                      u.username !== user?.username
+                    "
+                  >
+                    <button
+                      @click="removePlayer(u.username)"
+                      class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                      title="Remove player"
+                    >
+                      <span class="text-sm">❌</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -316,13 +346,58 @@
       </div>
     </div>
   </div>
+
+  <!-- Delete Room Confirmation Modal -->
+  <div
+    v-if="showDeleteConfirm"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div
+      class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 border-2 border-red-200"
+    >
+      <div class="text-center space-y-6">
+        <div class="text-6xl">⚠️</div>
+        <h2 class="text-2xl font-bold text-red-800">Delete Room</h2>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p class="text-red-700 mb-2">
+            Are you sure you want to delete this room?
+          </p>
+          <p class="text-sm text-red-600">
+            This action cannot be undone. All players will be kicked out and the
+            room will be permanently deleted.
+          </p>
+        </div>
+
+        <div class="flex space-x-4">
+          <button
+            @click="showDeleteConfirm = false"
+            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg font-medium transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            @click="deleteRoom"
+            :disabled="isDeleting"
+            class="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+          >
+            <span v-if="isDeleting">Deleting...</span>
+            <span v-else>Delete Room</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { io } from "socket.io-client";
-import { getCurrentUser, getRoomById } from "../services/api-service";
+import {
+  getCurrentUser,
+  getRoomById,
+  deleteRoom as deleteRoomApi,
+} from "../services/api-service";
 import { computed } from "vue";
 
 const route = useRoute();
@@ -336,6 +411,9 @@ const user = ref(null);
 const users = ref([]);
 const ready = ref(false);
 const gameStarting = ref(false);
+const gameEndingCountdown = ref(0);
+const showDeleteConfirm = ref(false);
+const isDeleting = ref(false);
 
 const canStartGame = computed(() => {
   return users.value.length >= 4 && users.value.every((u) => u.ready);
@@ -352,8 +430,8 @@ const startRestrictionReason = computed(() => {
 
 onMounted(async () => {
   try {
-    room.value = await getRoomById(roomId);
     user.value = await getCurrentUser();
+    room.value = await getRoomById(roomId);
 
     socket.emit("joinRoom", {
       roomId,
@@ -370,6 +448,24 @@ onMounted(async () => {
       }
     });
 
+    // Listen for being removed from room
+    socket.on("playerRemoved", (data) => {
+      alert(data.message);
+      router.push("/home");
+    });
+
+    // Listen for room deletion
+    socket.on("roomDeleted", (data) => {
+      alert(data.message);
+      router.push("/home");
+    });
+
+    // Listen for player removal notifications
+    socket.on("playerRemovedNotification", (data) => {
+      console.log(data.message);
+      // You could show a toast notification here
+    });
+
     // Listen for game start event and redirect to game page
     socket.on("gameStarted", (data) => {
       gameStarting.value = true;
@@ -380,9 +476,37 @@ onMounted(async () => {
         router.push(`/room/${roomId}/game`);
       }, 1000);
     });
+
+    // Listen for game errors
+    socket.on("gameError", (error) => {
+      console.error("Game error:", error.message);
+      alert(error.message);
+
+      // If redirect flag is set, redirect to home page
+      if (error.redirect) {
+        router.push("/home");
+        return;
+      }
+    });
+
+    // Listen for game ending countdown
+    socket.on("gameEndingCountdown", (data) => {
+      console.log("Game ending countdown:", data.countdown);
+      gameEndingCountdown.value = data.countdown;
+    });
+
+    // Listen for game ended by host
+    socket.on("gameEnded", (data) => {
+      console.log("Game ended by host:", data.message);
+      gameEndingCountdown.value = 0;
+      // Stay on current page (lobby) and refresh room state
+    });
   } catch (err) {
     if (err.message === "Not authenticated to view this room") {
       alert("You're not authenticated to join! Please join with password!");
+      router.push("/home");
+    } else if (err.message === "Room not found") {
+      alert("Room not found!");
       router.push("/home");
     } else {
       router.push("/login");
@@ -391,6 +515,11 @@ onMounted(async () => {
 });
 
 const handleLeave = () => {
+  // Don't allow leaving during game ending countdown
+  if (gameEndingCountdown.value > 0) {
+    return;
+  }
+
   socket.emit("leaveRoom", {
     roomId,
     username: user.value.username,
@@ -414,6 +543,41 @@ function startGame() {
     socket.emit("startGame", roomId);
   }
 }
+
+const removePlayer = (username) => {
+  if (user.value?.username === room.value?.creatorUsername) {
+    socket.emit("removePlayer", {
+      roomId,
+      username: username,
+      hostUsername: user.value.username,
+    });
+  }
+};
+
+const deleteRoom = async () => {
+  if (user.value?.username !== room.value?.creatorUsername) return;
+
+  isDeleting.value = true;
+  try {
+    // Call API to delete room from database
+    await deleteRoomApi(roomId);
+
+    // Emit socket event to notify all users and cleanup
+    socket.emit("deleteRoom", {
+      roomId,
+      hostUsername: user.value.username,
+    });
+
+    // Redirect to home
+    router.push("/home");
+  } catch (error) {
+    console.error("Failed to delete room:", error);
+    alert("Failed to delete room: " + error.message);
+  } finally {
+    isDeleting.value = false;
+    showDeleteConfirm.value = false;
+  }
+};
 
 onUnmounted(() => {
   if (socket) {

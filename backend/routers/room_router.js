@@ -108,3 +108,27 @@ roomRouter.get("/:id", async (req, res) => {
       .json({ error: "Failed to fetch room", details: err.message });
   }
 });
+
+roomRouter.delete("/:id", async (req, res) => {
+  if (isNaN(Number(req.params.id))) {
+    return res.status(400).json({ error: "Invalid room ID" });
+  }
+
+  try {
+    const room = await Room.findByPk(req.params.id);
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    // Delete the room from database
+    await room.destroy();
+
+    console.log(`Room ${req.params.id} deleted from database`);
+    res.status(200).json({ message: "Room deleted successfully" });
+  } catch (err) {
+    console.error(`Error deleting room ${req.params.id}:`, err);
+    res
+      .status(500)
+      .json({ error: "Failed to delete room", details: err.message });
+  }
+});

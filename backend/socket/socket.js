@@ -114,6 +114,15 @@ export function setupSocket(server) {
       let users = await getRoomUsers(roomId);
       let existing = users.find((u) => u.username === username);
 
+      // Check if game is in progress and user is not already in the room
+      if (gameStates.has(roomId) && !existing) {
+        socket.emit("gameError", {
+          message: "Cannot join room - game is already in progress",
+          redirect: true, // Add redirect flag
+        });
+        return;
+      }
+
       if (existing) {
         existing.socketId = socket.id;
       } else {
@@ -123,8 +132,8 @@ export function setupSocket(server) {
       await setRoomUsers(roomId, users);
       io.to(roomId).emit("roomUpdate", users);
 
-      // Send current game state if game is in progress
-      if (gameStates.has(roomId)) {
+      // Send current game state if game is in progress and user is in the room
+      if (gameStates.has(roomId) && existing) {
         const gameState = gameStates.get(roomId);
         sendGameStateToUser(socket, gameState, username);
       }
@@ -309,13 +318,18 @@ export function setupSocket(server) {
 
       if (isCorrect) {
         // Non-spy players win
-        io.to(roomId).emit("gameEnd", {
+        const gameResult = {
           result: "GUESS_CORRECT",
           winner: "NON_SPY_PLAYERS",
           secretWord: gameState.secretWord,
           spy: gameState.spyUsername,
           finalGuess: guess,
-        });
+        };
+
+        io.to(roomId).emit("gameEnd", gameResult);
+
+        // Start countdown timer for room cleanup
+        startGameEndCountdown(roomId);
       } else {
         // Move to voting phase
         gameState.gamePhase = "VOTING";
@@ -430,6 +444,9 @@ export function setupSocket(server) {
         console.log(`Result:`, gameResult);
 
         io.to(roomId).emit("gameEnd", gameResult);
+
+        // Start countdown timer for room cleanup
+        startGameEndCountdown(roomId);
       } else {
         // Notify room about vote progress
         io.to(roomId).emit("voteProgress", {
@@ -439,7 +456,68 @@ export function setupSocket(server) {
       }
     });
 
+    socket.on("endGame", async ({ roomId, username }) => {
+      const users = await getRoomUsers(roomId);
+      const room = users.find((u) => u.username === username);
+
+      // Only allow host to end game
+      if (!room) {
+        socket.emit("gameError", { message: "User not found in room" });
+        return;
+      }
+
+      // Check if there's an active game
+      if (!gameStates.has(roomId)) {
+        socket.emit("gameError", { message: "No active game to end" });
+        return;
+      }
+
+      console.log(`Host ${username} is ending game in room ${roomId}`);
+
+      // Start 10-second countdown
+      let countdown = 10;
+      io.to(roomId).emit("gameEndingCountdown", {
+        countdown,
+        message: `Host is ending the game. Returning to lobby in ${countdown} seconds...`,
+      });
+
+      const endGameInterval = setInterval(() => {
+        countdown--;
+        io.to(roomId).emit("gameEndingCountdown", {
+          countdown,
+          message: `Host is ending the game. Returning to lobby in ${countdown} seconds...`,
+        });
+
+        if (countdown <= 0) {
+          clearInterval(endGameInterval);
+
+          // Reset all players to unready state
+          const resetUsers = users.map((u) => ({ ...u, ready: false }));
+          setRoomUsers(roomId, resetUsers);
+
+          // Remove game state
+          gameStates.delete(roomId);
+
+          // Notify all clients to return to lobby
+          io.to(roomId).emit("gameEnded", {
+            message: "Game ended by host. All players reset to unready state.",
+          });
+          io.to(roomId).emit("roomUpdate", resetUsers);
+
+          console.log(`Game ended by host in room ${roomId}`);
+        }
+      }, 1000);
+    });
+
     socket.on("leaveGame", async ({ roomId, username }) => {
+      // Check if game is in progress
+      if (gameStates.has(roomId)) {
+        socket.emit("gameError", {
+          message: "Cannot leave room during active game",
+        });
+        return;
+      }
+
       // Handle leave game logic
       socket.leave(roomId);
 
@@ -450,20 +528,18 @@ export function setupSocket(server) {
       io.to(roomId).emit("roomUpdate", users);
       io.to(roomId).emit("userLeftGame", { username });
 
-      // If game creator leaves, end the game
-      const gameState = gameStates.get(roomId);
-      if (gameState && users.length < 2) {
-        gameStates.delete(roomId);
-        io.to(roomId).emit("gameEnd", {
-          result: "GAME_CANCELLED",
-          message: "Game ended due to insufficient players",
-        });
-      }
-
       console.log(`${username} left game in room ${roomId}`);
     });
 
     socket.on("leaveRoom", async ({ roomId, username }) => {
+      // Check if game is in progress
+      if (gameStates.has(roomId)) {
+        socket.emit("gameError", {
+          message: "Cannot leave room during active game",
+        });
+        return;
+      }
+
       let users = await getRoomUsers(roomId);
       users = users.filter((u) => u.username !== username);
 
@@ -486,7 +562,186 @@ export function setupSocket(server) {
         io.to(roomId).emit("roomUpdate", updatedUsers);
       }
     });
+
+    socket.on("removePlayer", async ({ roomId, username, hostUsername }) => {
+      try {
+        const users = await getRoomUsers(roomId);
+        const host = users.find((u) => u.username === hostUsername);
+        const targetUser = users.find((u) => u.username === username);
+
+        // Verify that the requester is the host
+        if (!host || host.socketId !== socket.id) {
+          socket.emit("gameError", {
+            message: "Only the host can remove players",
+          });
+          return;
+        }
+
+        // Check if game is in progress
+        if (gameStates.has(roomId)) {
+          socket.emit("gameError", {
+            message: "Cannot remove players during active game",
+          });
+          return;
+        }
+
+        // Can't remove yourself
+        if (username === hostUsername) {
+          socket.emit("gameError", { message: "Cannot remove yourself" });
+          return;
+        }
+
+        if (!targetUser) {
+          socket.emit("gameError", { message: "Player not found in room" });
+          return;
+        }
+
+        // Remove the player from the room
+        const updatedUsers = users.filter((u) => u.username !== username);
+        await setRoomUsers(roomId, updatedUsers);
+
+        // Notify the removed player
+        const targetSocket = io.sockets.sockets.get(targetUser.socketId);
+        if (targetSocket) {
+          targetSocket.emit("playerRemoved", {
+            message: "You have been removed from the room by the host",
+            roomId,
+          });
+          targetSocket.leave(roomId);
+        }
+
+        // Update all remaining users
+        io.to(roomId).emit("roomUpdate", updatedUsers);
+        io.to(roomId).emit("playerRemovedNotification", {
+          message: `${username} has been removed from the room`,
+          removedPlayer: username,
+        });
+
+        console.log(
+          `Player ${username} removed from room ${roomId} by host ${hostUsername}`,
+        );
+      } catch (error) {
+        console.error(
+          `Error removing player ${username} from room ${roomId}:`,
+          error,
+        );
+        socket.emit("gameError", { message: "Failed to remove player" });
+      }
+    });
+
+    socket.on("deleteRoom", async ({ roomId, hostUsername }) => {
+      try {
+        const users = await getRoomUsers(roomId);
+        const host = users.find((u) => u.username === hostUsername);
+
+        // Verify that the requester is the host
+        if (!host || host.socketId !== socket.id) {
+          socket.emit("gameError", {
+            message: "Only the host can delete the room",
+          });
+          return;
+        }
+
+        // Check if game is in progress
+        if (gameStates.has(roomId)) {
+          socket.emit("gameError", {
+            message: "Cannot delete room during active game",
+          });
+          return;
+        }
+
+        console.log(`Host ${hostUsername} is deleting room ${roomId}`);
+
+        // Notify all users in the room that it's being deleted
+        io.to(roomId).emit("roomDeleted", {
+          message: "This room has been deleted by the host",
+          roomId,
+        });
+
+        // Remove all users from the room
+        for (const user of users) {
+          const userSocket = io.sockets.sockets.get(user.socketId);
+          if (userSocket) {
+            userSocket.leave(roomId);
+          }
+        }
+
+        // Clean up room data
+        await setRoomUsers(roomId, []);
+        await redis.del(`room:${roomId}`);
+
+        // Remove game state if exists
+        gameStates.delete(roomId);
+
+        console.log(`Room ${roomId} has been deleted by host ${hostUsername}`);
+      } catch (error) {
+        console.error(`Error deleting room ${roomId}:`, error);
+        socket.emit("gameError", { message: "Failed to delete room" });
+      }
+    });
   });
+
+  // Helper function to start countdown timer and cleanup room
+  function startGameEndCountdown(roomId) {
+    console.log(`Starting 30-second countdown for room ${roomId}`);
+
+    let countdown = 30;
+
+    // Send initial countdown
+    io.to(roomId).emit("gameEndCountdown", { countdown });
+
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      io.to(roomId).emit("gameEndCountdown", { countdown });
+
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+
+        // Clean up room
+        cleanupRoom(roomId);
+
+        // Notify clients to redirect
+        io.to(roomId).emit("roomDestroyed", {
+          message: "Room has been destroyed. Redirecting to home page...",
+        });
+
+        console.log(`Room ${roomId} has been destroyed after countdown`);
+      }
+    }, 1000);
+  }
+
+  // Helper function to cleanup room data
+  async function cleanupRoom(roomId) {
+    try {
+      // Remove from game states
+      gameStates.delete(roomId);
+
+      // Clear room users from Redis
+      await setRoomUsers(roomId, []);
+
+      // Remove room key from Redis
+      await redis.del(`room:${roomId}`);
+
+      // Delete room from database using Room model directly
+      try {
+        const { Room } = await import("../models/rooms.js");
+        const room = await Room.findByPk(roomId);
+        if (room) {
+          await room.destroy();
+          console.log(`Cleaned up room data for ${roomId} - Database: SUCCESS`);
+        } else {
+          console.log(
+            `Cleaned up room data for ${roomId} - Database: ROOM_NOT_FOUND`,
+          );
+        }
+      } catch (dbError) {
+        console.error(`Error deleting room ${roomId} from database:`, dbError);
+        console.log(`Cleaned up room data for ${roomId} - Database: FAILED`);
+      }
+    } catch (error) {
+      console.error(`Error cleaning up room ${roomId}:`, error);
+    }
+  }
 }
 
 // Helper function to send correct game state to each user
@@ -504,10 +759,18 @@ function sendGameStateToUser(socket, gameState, username) {
   let currentGameImage = null;
   let currentGamePlayer = null;
   let showPreviousImage = false;
+  let userGeneratedImage = null;
+  let hasCompletedGeneration = false;
 
   // Only show secret word to the first player if they're not a spy and it's their turn
   if (isFirstPlayer && !isSpy) {
     secretWord = gameState.secretWord;
+  }
+
+  const userImage = gameState.images.find((img) => img.player === username);
+  if (userImage) {
+    userGeneratedImage = userImage.imageUrl;
+    hasCompletedGeneration = true;
   }
 
   // Show images based on game progress - all players see the same state
@@ -556,9 +819,11 @@ function sendGameStateToUser(socket, gameState, username) {
     previousPlayer,
     currentGameImage,
     currentGamePlayer,
+    userGeneratedImage,
+    hasCompletedGeneration,
   });
 
   console.log(
-    `Sent game state to ${username}: phase=${gameState.gamePhase}, turn=${gameState.turn}, currentPlayer=${gameState.currentPlayer}, isFirstPlayer=${isFirstPlayer}, showPreviousImage=${showPreviousImage}, secretWord=${secretWord ? "YES" : "NO"}, previousImage=${previousImage ? "YES" : "NO"}, currentGameImage=${currentGameImage ? "YES" : "NO"}`,
+    `Sent game state to ${username}: phase=${gameState.gamePhase}, turn=${gameState.turn}, currentPlayer=${gameState.currentPlayer}, isFirstPlayer=${isFirstPlayer}, showPreviousImage=${showPreviousImage}, secretWord=${secretWord ? "YES" : "NO"}, previousImage=${previousImage ? "YES" : "NO"}, currentGameImage=${currentGameImage ? "YES" : "NO"}, userImage=${userGeneratedImage ? "YES" : "NO"}, completed=${hasCompletedGeneration}`,
   );
 }
