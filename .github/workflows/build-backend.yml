@@ -45,4 +45,4 @@ jobs:
           script: |
             cd ~/project-ai-doodle
             docker-compose pull backend
-            docker-compose up -d --force-recreate backend
+            docker-compose up -d --no-deps --force-recreate backend
