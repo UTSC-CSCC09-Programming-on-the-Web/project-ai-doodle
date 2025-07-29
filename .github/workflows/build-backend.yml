@@ -44,6 +44,7 @@ jobs:
           key: ${{ secrets.VM_DEPLOY_KEY }}
           script: |
             cd ~/project-ai-doodle
-            docker-compose down
+            docker-compose stop backend
+            docker-compose rm -f backend
             docker-compose pull backend
-            docker-compose up -d backend
+            docker-compose up -d --no-deps --force-recreate backend
