@@ -43,6 +43,8 @@ jobs:
           key: ${{ secrets.VM_DEPLOY_KEY }}
           script: |
             cd ~/project-ai-doodle
+            docker-compose stop frontend
+            docker-compose rm -f frontend
             docker-compose pull backend
             docker-compose up -d backend
 
