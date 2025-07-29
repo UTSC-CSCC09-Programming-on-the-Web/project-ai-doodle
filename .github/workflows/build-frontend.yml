@@ -1,4 +1,4 @@
-name: Build and Deploy Frontend 
+name: Build and Deploy Frontend
 
 on:
   push:
@@ -14,15 +14,14 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Build frontend Docker image
-        run: docker build --no-cache . -t $IMAGE_NAME
+        run: |
+          cd frontend
+          docker build --no-cache . -t $IMAGE_NAME
 
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -44,7 +43,8 @@ jobs:
           key: ${{ secrets.VM_DEPLOY_KEY }}
           script: |
             cd ~/project-ai-doodle
-            docker-compose stop frontend
-            docker-compose rm -f frontend
             docker-compose pull frontend
             docker-compose up -d --no-deps --force-recreate frontend
+
+      - name: Check code is up to date
+        run: docker run --rm $IMAGE_NAME ls -l /usr/share/nginx/html
