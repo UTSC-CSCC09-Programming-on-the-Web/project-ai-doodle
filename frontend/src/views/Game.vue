@@ -352,8 +352,8 @@ const startRestrictionReason = computed(() => {
 
 onMounted(async () => {
   try {
-    user.value = await getCurrentUser();
     room.value = await getRoomById(roomId);
+    user.value = await getCurrentUser();
 
     socket.emit("joinRoom", {
       roomId,
@@ -381,7 +381,12 @@ onMounted(async () => {
       }, 1000);
     });
   } catch (err) {
-    router.push("/login");
+    if (err.message === "Not authenticated to view this room") {
+      alert("You're not authenticated to join! Please join with password!");
+      router.push("/home");
+    } else {
+      router.push("/login");
+    }
   }
 });
 

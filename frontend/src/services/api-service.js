@@ -50,6 +50,9 @@ export async function getRoomById(id) {
   const res = await fetch(`${API_BASE}/rooms/${id}`, {
     credentials: "include",
   });
+  if (res.status === 403) {
+    throw new Error("Not authenticated to view this room");
+  }
   if (!res.ok) throw new Error("Failed to fetch room");
   return res.json();
 }

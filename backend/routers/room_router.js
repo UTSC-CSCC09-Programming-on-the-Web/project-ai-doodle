@@ -22,6 +22,11 @@ roomRouter.post("/", async (req, res) => {
       creatorUsername,
     });
 
+    if (!req.session.joinedRooms) {
+      req.session.joinedRooms = [];
+    }
+    req.session.joinedRooms.push(newRoom.id);
+
     res.status(200).json(newRoom);
   } catch (err) {
     res
@@ -46,6 +51,12 @@ roomRouter.post("/join", async (req, res) => {
     if (room.passcode !== passcode) {
       return res.status(401).json({ error: "Incorrect passcode" });
     }
+
+    // save the room ID in the session
+    if (!req.session.joinedRooms) {
+      req.session.joinedRooms = [];
+    }
+    req.session.joinedRooms.push(room.id);
 
     const roomData = room.toJSON();
     delete roomData.passcode;
@@ -76,6 +87,14 @@ roomRouter.get("/:id", async (req, res) => {
     const requester = req.user && req.user.username;
     if (!requester) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+    if (
+      !req.session.joinedRooms ||
+      !req.session.joinedRooms.includes(room.id)
+    ) {
+      return res
+        .status(403)
+        .json({ error: "Not authenticated to view this room" });
     }
 
     if (roomData.creatorUsername !== requester) {
