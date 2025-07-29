@@ -1164,204 +1164,230 @@ onMounted(async () => {
     user.value = await getCurrentUser();
     room.value = await getRoomById(roomId);
 
-    // Rejoin the room
-    socket.emit("joinRoom", {
+    // First check if user has access to the game
+    socket.emit("checkGameAccess", {
       roomId,
       username: user.value.username,
     });
 
-    socket.on("roomUpdate", (roomUsers) => {
-      users.value = roomUsers;
+    // Listen for game access response
+    socket.on("gameAccessGranted", (data) => {
+      console.log("Game access granted:", data.message);
+      // Continue with normal game setup
+      setupGameListeners();
     });
 
-    // Listen for game updates
-    socket.on("gameUpdate", (gameState) => {
-      console.log("Received game update:", gameState);
-
-      const wasYourTurn = isYourTurn.value;
-      const newIsYourTurn = gameState.currentPlayer === user.value.username;
-
-      currentPlayer.value = gameState.currentPlayer;
-      currentTurn.value = gameState.turn;
-      totalTurns.value = gameState.totalTurns;
-      gamePhase.value = gameState.gamePhase || "IMAGE_GENERATION";
-      secretWord.value = gameState.secretWord || "";
-      isYourTurn.value = newIsYourTurn;
-      isSpy.value = gameState.isSpy || false;
-      isFirstPlayer.value = gameState.isFirstPlayer || false;
-      showPreviousImage.value = gameState.showPreviousImage !== false;
-      playerOrder.value = gameState.playerOrder || [];
-
-      if (gameState.userGeneratedImage) {
-        userGeneratedImage.value = gameState.userGeneratedImage;
-        currentImage.value = gameState.userGeneratedImage;
-      }
-
-      if (gameState.hasCompletedGeneration !== undefined) {
-        hasCompletedGeneration.value = gameState.hasCompletedGeneration;
-      }
-
-      if (userGeneratedImage.value && !newIsYourTurn) {
-        currentImage.value = userGeneratedImage.value;
-      }
-
-      // Show secret word only if provided by server
-      showSecretWord.value = !!gameState.secretWord;
-
-      // Update images based on new logic
-      if (gameState.previousImage) {
-        previousImage.value = gameState.previousImage;
-        previousPlayer.value = gameState.previousPlayer;
-      }
-
-      if (gameState.currentGameImage) {
-        currentGameImage.value = gameState.currentGameImage;
-        currentGamePlayer.value = gameState.currentGamePlayer;
-      }
-
-      console.log(
-        `Game state updated - Phase: ${gamePhase.value}, Turn: ${currentTurn.value}, Current: ${currentPlayer.value}, Your turn: ${isYourTurn.value}, FirstPlayer: ${isFirstPlayer.value}, ShowPrevious: ${showPreviousImage.value}, Secret: ${secretWord.value ? "YES" : "NO"}, Spy: ${isSpy.value}, UserImage: ${userGeneratedImage.value ? "YES" : "NO"}, Completed: ${hasCompletedGeneration.value}`,
-      );
-    });
-
-    // Listen for phase changes
-    socket.on("phaseChange", (data) => {
-      console.log("Phase change:", data);
-      gamePhase.value = data.phase;
-
-      if (data.phase === "FINAL_GUESS") {
-        // Clear any previous states
-        isGenerating.value = false;
-        generationStatus.value = null;
-      } else if (data.phase === "VOTING") {
-        // Set up voting phase data
-        console.log("Entering voting phase with data:", data);
-
-        // Clear any previous states
-        isGenerating.value = false;
-        isSubmittingGuess.value = false;
-        generationStatus.value = null;
-        guessStatus.value = null;
-
-        // Set voting data
-        allImages.value = data.images || [];
-        revealedSecretWord.value = data.secretWord || "";
-        finalGuessResult.value = data.finalGuess || "";
-
-        // Reset voting state
-        selectedVote.value = "";
-        isSubmittingVote.value = false;
-        voteStatus.value = null;
-
-        console.log(
-          `Voting phase setup - Images: ${allImages.value.length}, Secret: ${revealedSecretWord.value}, Guess: ${finalGuessResult.value}`,
-        );
-      }
-    });
-
-    // Listen for image generation start
-    socket.on("imageGenerating", (data) => {
-      if (data.player === user.value.username) {
-        isGenerating.value = true;
-        generatingMessage.value = data.message || "Generating image with AI...";
-        generationStatus.value = null;
-      }
-    });
-
-    // Listen for image generation results
-    socket.on("imageGenerated", (data) => {
-      console.log("Image generated:", data);
-      if (data.player === user.value.username) {
-        currentImage.value = data.imageUrl;
-        userGeneratedImage.value = data.imageUrl;
-        isGenerating.value = false;
-        hasCompletedGeneration.value = true;
-        prompt.value = ""; // Clear prompt after successful generation
-        generationStatus.value = {
-          type: "success",
-          message:
-            "Image generated successfully! Waiting for the next player to continue...",
-        };
-
-        setTimeout(() => {
-          generationStatus.value = null;
-        }, 5000);
-      }
-    });
-
-    // Listen for game ending countdown
-    socket.on("gameEndingCountdown", (data) => {
-      console.log("Game ending countdown:", data.countdown);
-      gameEndingCountdown.value = data.countdown;
-    });
-
-    // Listen for game ended by host
-    socket.on("gameEnded", (data) => {
-      console.log("Game ended by host:", data.message);
-      gameEndingCountdown.value = 0;
-      // Redirect to game lobby
-      router.push(`/room/${roomId}`);
-    });
-
-    // Listen for game errors (like trying to join active game)
-    socket.on("gameError", (error) => {
-      console.error("Game error:", error.message);
-      // Show error message to user
-      alert(error.message);
-
-      // If redirect flag is set, redirect to home page
-      if (error.redirect) {
-        router.push("/home");
+    socket.on("gameAccessDenied", (data) => {
+      console.log("Game access denied:", data.message);
+      alert(data.message);
+      if (data.redirect) {
+        // Redirect back to room lobby
+        router.push(`/room/${roomId}`);
         return;
       }
-
-      // Reset states if needed for other errors
-      isGenerating.value = false;
-      isSubmittingGuess.value = false;
-
-      if (gamePhase.value === "FINAL_GUESS") {
-        guessStatus.value = {
-          type: "error",
-          message: error.message,
-        };
-        setTimeout(() => {
-          guessStatus.value = null;
-        }, 5000);
-      } else {
-        generationStatus.value = {
-          type: "error",
-          message: error.message,
-        };
-        setTimeout(() => {
-          generationStatus.value = null;
-        }, 5000);
-      }
-    });
-
-    // Listen for game end
-    socket.on("gameEnd", (data) => {
-      console.log("Game ended:", data);
-      // Handle game end - show results
-      gameResult.value = data;
-    });
-
-    // Listen for countdown updates
-    socket.on("gameEndCountdown", (data) => {
-      console.log("Countdown update:", data.countdown);
-      countdown.value = data.countdown;
-    });
-
-    // Listen for room destruction
-    socket.on("roomDestroyed", (data) => {
-      console.log("Room destroyed:", data.message);
-      // Force redirect to home
-      handleLeave();
     });
   } catch (err) {
     console.error("Failed to load game:", err);
     router.push("/home");
   }
 });
+
+// Extract game listeners setup into a separate function
+function setupGameListeners() {
+  // Rejoin the room for socket communication
+  socket.emit("joinRoom", {
+    roomId,
+    username: user.value.username,
+  });
+
+  socket.on("roomUpdate", (roomUsers) => {
+    users.value = roomUsers;
+  });
+
+  // Listen for game updates
+  socket.on("gameUpdate", (gameState) => {
+    console.log("Received game update:", gameState);
+
+    const wasYourTurn = isYourTurn.value;
+    const newIsYourTurn = gameState.currentPlayer === user.value.username;
+
+    currentPlayer.value = gameState.currentPlayer;
+    currentTurn.value = gameState.turn;
+    totalTurns.value = gameState.totalTurns;
+    gamePhase.value = gameState.gamePhase || "IMAGE_GENERATION";
+    secretWord.value = gameState.secretWord || "";
+    isYourTurn.value = newIsYourTurn;
+    isSpy.value = gameState.isSpy || false;
+    isFirstPlayer.value = gameState.isFirstPlayer || false;
+    showPreviousImage.value = gameState.showPreviousImage !== false;
+    playerOrder.value = gameState.playerOrder || [];
+
+    if (gameState.userGeneratedImage) {
+      userGeneratedImage.value = gameState.userGeneratedImage;
+      currentImage.value = gameState.userGeneratedImage;
+    }
+
+    if (gameState.hasCompletedGeneration !== undefined) {
+      hasCompletedGeneration.value = gameState.hasCompletedGeneration;
+    }
+
+    if (userGeneratedImage.value && !newIsYourTurn) {
+      currentImage.value = userGeneratedImage.value;
+    }
+
+    // Show secret word only if provided by server
+    showSecretWord.value = !!gameState.secretWord;
+
+    // Update images based on new logic
+    if (gameState.previousImage) {
+      previousImage.value = gameState.previousImage;
+      previousPlayer.value = gameState.previousPlayer;
+    }
+
+    if (gameState.currentGameImage) {
+      currentGameImage.value = gameState.currentGameImage;
+      currentGamePlayer.value = gameState.currentGamePlayer;
+    }
+
+    console.log(
+      `Game state updated - Phase: ${gamePhase.value}, Turn: ${currentTurn.value}, Current: ${currentPlayer.value}, Your turn: ${isYourTurn.value}, FirstPlayer: ${isFirstPlayer.value}, ShowPrevious: ${showPreviousImage.value}, Secret: ${secretWord.value ? "YES" : "NO"}, Spy: ${isSpy.value}, UserImage: ${userGeneratedImage.value ? "YES" : "NO"}, Completed: ${hasCompletedGeneration.value}`,
+    );
+  });
+
+  // Listen for phase changes
+  socket.on("phaseChange", (data) => {
+    console.log("Phase change:", data);
+    gamePhase.value = data.phase;
+
+    if (data.phase === "FINAL_GUESS") {
+      // Clear any previous states
+      isGenerating.value = false;
+      generationStatus.value = null;
+    } else if (data.phase === "VOTING") {
+      // Set up voting phase data
+      console.log("Entering voting phase with data:", data);
+
+      // Clear any previous states
+      isGenerating.value = false;
+      isSubmittingGuess.value = false;
+      generationStatus.value = null;
+      guessStatus.value = null;
+
+      // Set voting data
+      allImages.value = data.images || [];
+      revealedSecretWord.value = data.secretWord || "";
+      finalGuessResult.value = data.finalGuess || "";
+
+      // Reset voting state
+      selectedVote.value = "";
+      isSubmittingVote.value = false;
+      voteStatus.value = null;
+
+      console.log(
+        `Voting phase setup - Images: ${allImages.value.length}, Secret: ${revealedSecretWord.value}, Guess: ${finalGuessResult.value}`,
+      );
+    }
+  });
+
+  // Listen for image generation start
+  socket.on("imageGenerating", (data) => {
+    if (data.player === user.value.username) {
+      isGenerating.value = true;
+      generatingMessage.value = data.message || "Generating image with AI...";
+      generationStatus.value = null;
+    }
+  });
+
+  // Listen for image generation results
+  socket.on("imageGenerated", (data) => {
+    console.log("Image generated:", data);
+    if (data.player === user.value.username) {
+      currentImage.value = data.imageUrl;
+      userGeneratedImage.value = data.imageUrl;
+      isGenerating.value = false;
+      hasCompletedGeneration.value = true;
+      prompt.value = ""; // Clear prompt after successful generation
+      generationStatus.value = {
+        type: "success",
+        message:
+          "Image generated successfully! Waiting for the next player to continue...",
+      };
+
+      setTimeout(() => {
+        generationStatus.value = null;
+      }, 5000);
+    }
+  });
+
+  // Listen for game ending countdown
+  socket.on("gameEndingCountdown", (data) => {
+    console.log("Game ending countdown:", data.countdown);
+    gameEndingCountdown.value = data.countdown;
+  });
+
+  // Listen for game ended by host
+  socket.on("gameEnded", (data) => {
+    console.log("Game ended by host:", data.message);
+    gameEndingCountdown.value = 0;
+    // Redirect to game lobby
+    router.push(`/room/${roomId}`);
+  });
+
+  // Listen for game errors (like trying to join active game)
+  socket.on("gameError", (error) => {
+    console.error("Game error:", error.message);
+    // Show error message to user
+    alert(error.message);
+
+    // If redirect flag is set, redirect to home page
+    if (error.redirect) {
+      router.push("/home");
+      return;
+    }
+
+    // Reset states if needed for other errors
+    isGenerating.value = false;
+    isSubmittingGuess.value = false;
+
+    if (gamePhase.value === "FINAL_GUESS") {
+      guessStatus.value = {
+        type: "error",
+        message: error.message,
+      };
+      setTimeout(() => {
+        guessStatus.value = null;
+      }, 5000);
+    } else {
+      generationStatus.value = {
+        type: "error",
+        message: error.message,
+      };
+      setTimeout(() => {
+        generationStatus.value = null;
+      }, 5000);
+    }
+  });
+
+  // Listen for game end
+  socket.on("gameEnd", (data) => {
+    console.log("Game ended:", data);
+    // Handle game end - show results
+    gameResult.value = data;
+  });
+
+  // Listen for countdown updates
+  socket.on("gameEndCountdown", (data) => {
+    console.log("Countdown update:", data.countdown);
+    countdown.value = data.countdown;
+  });
+
+  // Listen for room destruction
+  socket.on("roomDestroyed", (data) => {
+    console.log("Room destroyed:", data.message);
+    // Force redirect to home
+    handleLeave();
+  });
+}
 
 const generateImage = async () => {
   if (

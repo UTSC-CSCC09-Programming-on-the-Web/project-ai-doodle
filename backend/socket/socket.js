@@ -118,7 +118,7 @@ export function setupSocket(server) {
       if (gameStates.has(roomId) && !existing) {
         socket.emit("gameError", {
           message: "Cannot join room - game is already in progress",
-          redirect: true, // Add redirect flag
+          redirect: true,
         });
         return;
       }
@@ -137,6 +137,38 @@ export function setupSocket(server) {
         const gameState = gameStates.get(roomId);
         sendGameStateToUser(socket, gameState, username);
       }
+    });
+
+    // Add new event to check if user can access game page
+    socket.on("checkGameAccess", async ({ roomId, username }) => {
+      const gameState = gameStates.get(roomId);
+      const users = await getRoomUsers(roomId);
+      const user = users.find((u) => u.username === username);
+
+      if (!user) {
+        socket.emit("gameAccessDenied", {
+          message: "You are not in this room",
+          redirect: true,
+        });
+        return;
+      }
+
+      if (!gameState || !gameState.isActive) {
+        socket.emit("gameAccessDenied", {
+          message:
+            "No active game in this room. Please wait for the host to start the game.",
+          redirect: true,
+        });
+        return;
+      }
+
+      // If game exists and user is in the room, allow access
+      socket.emit("gameAccessGranted", {
+        message: "Access granted to game",
+      });
+
+      // Send current game state
+      sendGameStateToUser(socket, gameState, username);
     });
 
     socket.on("setReady", async ({ roomId, username, ready }) => {
@@ -184,6 +216,8 @@ export function setupSocket(server) {
         images: [],
         gamePhase: "IMAGE_GENERATION",
         isActive: true,
+        gameStarted: true, // Add flag to indicate game was properly started
+        startedAt: new Date().toISOString(),
       };
 
       gameStates.set(roomId, gameState);
