@@ -297,7 +297,7 @@
 
               <!-- Game Rules Configuration -->
               <div class="border-t pt-4">
-                <GameRulesConfig v-model="gameRules" />
+                <GameRulesConfig v-model="gameRules" v-if="false" />
               </div>
 
               <button type="submit" class="btn-success w-full">
