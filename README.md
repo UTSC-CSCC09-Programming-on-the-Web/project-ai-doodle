@@ -1,8 +1,12 @@
 # AI Doodle
 
-## Deployed URL (version 1.0)
+## Deployed URL
 
 [https://aidoodle.online](https://aidoodle.online)
+
+## Video Demo Link
+
+[https://youtu.be/6xOm91hoAuk](https://youtu.be/6xOm91hoAuk)
 
 ## Team Members
 
