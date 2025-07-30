@@ -16,6 +16,11 @@ export const Room = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    allowSynonyms: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   },
   {
     timestamps: true,

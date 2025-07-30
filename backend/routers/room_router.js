@@ -4,7 +4,7 @@ import { Room } from "../models/rooms.js";
 export const roomRouter = Router();
 
 roomRouter.post("/", async (req, res) => {
-  const { name, passcode, creatorUsername } = req.body;
+  const { name, passcode, creatorUsername, allowSynonyms } = req.body;
 
   if (!name || !passcode || !creatorUsername) {
     return res.status(422).json({ error: "Missing required fields" });
@@ -20,6 +20,7 @@ roomRouter.post("/", async (req, res) => {
       name,
       passcode,
       creatorUsername,
+      allowSynonyms: allowSynonyms !== undefined ? allowSynonyms : true,
     });
 
     if (!req.session.joinedRooms) {

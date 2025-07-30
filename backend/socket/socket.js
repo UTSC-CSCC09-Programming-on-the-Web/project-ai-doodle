@@ -1,6 +1,8 @@
 import { Server } from "socket.io";
 import { getRoomUsers, setRoomUsers } from "./roomStore.js";
 import { redis } from "./redisClient.js";
+import { validateFinalGuess } from "../services/aiValidationService.js";
+import { Room } from "../models/rooms.js";
 
 // Game state storage (in production, use a proper database)
 const gameStates = new Map();
@@ -190,6 +192,12 @@ export function setupSocket(server) {
         return;
       }
 
+      // Get room settings
+      const room = await Room.findByPk(roomId);
+      const roomSettings = {
+        allowSynonyms: room ? room.allowSynonyms : true,
+      };
+
       // Initialize game state
       const secretWord =
         SECRET_WORDS[Math.floor(Math.random() * SECRET_WORDS.length)];
@@ -218,6 +226,7 @@ export function setupSocket(server) {
         isActive: true,
         gameStarted: true, // Add flag to indicate game was properly started
         startedAt: new Date().toISOString(),
+        roomSettings, // Include room settings in game state
       };
 
       gameStates.set(roomId, gameState);
@@ -346,46 +355,85 @@ export function setupSocket(server) {
         return;
       }
 
-      // Simple word matching (in production, use more sophisticated matching)
-      const isCorrect =
-        guess.toLowerCase() === gameState.secretWord.toLowerCase();
+      try {
+        // Get room settings for synonym validation
+        const room = await Room.findByPk(roomId);
+        const allowSynonyms = room ? room.allowSynonyms : true;
 
-      if (isCorrect) {
-        // Non-spy players win
-        const gameResult = {
-          result: "GUESS_CORRECT",
-          winner: "NON_SPY_PLAYERS",
-          secretWord: gameState.secretWord,
-          spy: gameState.spyUsername,
-          finalGuess: guess,
-        };
+        // Use AI to validate the guess
+        const isCorrect = await validateFinalGuess(
+          guess,
+          gameState.secretWord,
+          allowSynonyms,
+        );
 
-        io.to(roomId).emit("gameEnd", gameResult);
+        if (isCorrect) {
+          // Non-spy players win
+          io.to(roomId).emit("gameEnd", {
+            result: "GUESS_CORRECT",
+            winner: "NON_SPY_PLAYERS",
+            secretWord: gameState.secretWord,
+            spy: gameState.spyUsername,
+            finalGuess: guess,
+          });
+        } else {
+          // Move to voting phase
+          gameState.gamePhase = "VOTING";
+          gameState.currentPlayer = null; // No current player in voting phase
+          gameStates.set(roomId, gameState);
 
-        // Start countdown timer for room cleanup
-        startGameEndCountdown(roomId);
-      } else {
-        // Move to voting phase
-        gameState.gamePhase = "VOTING";
-        gameState.currentPlayer = null; // No current player in voting phase
-        gameStates.set(roomId, gameState);
+          // Send updated game state to all players for voting phase
+          const users = await getRoomUsers(roomId);
+          users.forEach((user) => {
+            const userSocket = io.sockets.sockets.get(user.socketId);
+            if (userSocket) {
+              sendGameStateToUser(userSocket, gameState, user.username);
+            }
+          });
 
-        // Send updated game state to all players for voting phase
-        const users = await getRoomUsers(roomId);
-        users.forEach((user) => {
-          const userSocket = io.sockets.sockets.get(user.socketId);
-          if (userSocket) {
-            sendGameStateToUser(userSocket, gameState, user.username);
-          }
-        });
+          io.to(roomId).emit("phaseChange", {
+            phase: "VOTING",
+            message: "Guess was incorrect! Time to vote for the spy.",
+            images: gameState.images,
+            secretWord: gameState.secretWord,
+            finalGuess: guess,
+          });
+        }
+      } catch (error) {
+        console.error("Error validating final guess:", error);
+        // Fallback to simple matching if AI validation fails
+        const isCorrect =
+          guess.toLowerCase() === gameState.secretWord.toLowerCase();
 
-        io.to(roomId).emit("phaseChange", {
-          phase: "VOTING",
-          message: "Guess was incorrect! Time to vote for the spy.",
-          images: gameState.images,
-          secretWord: gameState.secretWord,
-          finalGuess: guess,
-        });
+        if (isCorrect) {
+          io.to(roomId).emit("gameEnd", {
+            result: "GUESS_CORRECT",
+            winner: "NON_SPY_PLAYERS",
+            secretWord: gameState.secretWord,
+            spy: gameState.spyUsername,
+            finalGuess: guess,
+          });
+        } else {
+          gameState.gamePhase = "VOTING";
+          gameState.currentPlayer = null;
+          gameStates.set(roomId, gameState);
+
+          const users = await getRoomUsers(roomId);
+          users.forEach((user) => {
+            const userSocket = io.sockets.sockets.get(user.socketId);
+            if (userSocket) {
+              sendGameStateToUser(userSocket, gameState, user.username);
+            }
+          });
+
+          io.to(roomId).emit("phaseChange", {
+            phase: "VOTING",
+            message: "Guess was incorrect! Time to vote for the spy.",
+            images: gameState.images,
+            secretWord: gameState.secretWord,
+            finalGuess: guess,
+          });
+        }
       }
     });
 

@@ -294,6 +294,12 @@
                   placeholder="Set room password"
                 />
               </div>
+
+              <!-- Game Rules Configuration -->
+              <div class="border-t pt-4">
+                <GameRulesConfig v-model="gameRules" />
+              </div>
+
               <button type="submit" class="btn-success w-full">
                 <span class="mr-2">🏗️</span>
                 Create Room
@@ -352,6 +358,7 @@ import {
   joinRoomByName,
 } from "../services/api-service";
 import { ref, onMounted } from "vue";
+import GameRulesConfig from "../components/GameRulesConfig.vue";
 
 const router = useRouter();
 const user = ref(null);
@@ -378,12 +385,17 @@ const newRoom = ref({
   passcode: "",
 });
 
+const gameRules = ref({
+  allowSynonyms: true,
+});
+
 const createStatus = ref("");
 
 const handleCreateRoom = async () => {
   try {
     const roomData = {
       ...newRoom.value,
+      ...gameRules.value,
       creatorUsername: user.value.username,
     };
     const res = await createRoom(roomData);

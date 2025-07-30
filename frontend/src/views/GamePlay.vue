@@ -1067,10 +1067,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { io } from "socket.io-client";
 import { getCurrentUser, getRoomById } from "../services/api-service";
+import { checkPromptContent } from "../services/aiValidationService";
 
 const route = useRoute();
 const router = useRouter();
@@ -1400,8 +1401,29 @@ const generateImage = async () => {
 
   console.log(`Generating image with prompt: "${prompt.value}"`);
   isGenerating.value = true;
-  generatingMessage.value = "Connecting to AI service...";
+  generatingMessage.value = "Checking prompt content...";
   generationStatus.value = null;
+
+  generatingMessage.value = "Checking prompt content...";
+
+  // Check if prompt contains secret word (only for first player)
+  if (isFirstPlayer.value && secretWord.value) {
+    const containsSecretWord = checkPromptContent(
+      prompt.value.trim(),
+      secretWord.value,
+    );
+    if (containsSecretWord) {
+      generationStatus.value = {
+        type: "error",
+        message:
+          "Your prompt cannot contain the secret word. Please try again.",
+      };
+      isGenerating.value = false;
+      return;
+    }
+  }
+
+  generatingMessage.value = "Connecting to AI service...";
 
   // Emit to server for image generation
   socket.emit("generateImage", {
