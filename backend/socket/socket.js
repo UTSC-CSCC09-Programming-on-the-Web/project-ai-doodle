@@ -369,13 +369,16 @@ export function setupSocket(server) {
 
         if (isCorrect) {
           // Non-spy players win
-          io.to(roomId).emit("gameEnd", {
-            result: "GUESS_CORRECT",
-            winner: "NON_SPY_PLAYERS",
-            secretWord: gameState.secretWord,
-            spy: gameState.spyUsername,
-            finalGuess: guess,
-          });
+        const gameResult = {
+          result: "GUESS_CORRECT",
+          winner: "NON_SPY_PLAYERS",
+          secretWord: gameState.secretWord,
+          spy: gameState.spyUsername,
+          finalGuess: guess,
+        };
+        io.to(roomId).emit("gameEnd", gameResult);
+        // Start countdown timer for room cleanup
+        startGameEndCountdown(roomId);
         } else {
           // Move to voting phase
           gameState.gamePhase = "VOTING";
